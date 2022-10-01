@@ -1,0 +1,38 @@
+{% extends 'baselista.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block head %}
+<script src="{% static '/js/listacotizacion.js' %}"></script>
+{% endblock %}
+
+{% block columnas %}
+<tr>
+  <th scope="col">Numero</th>
+  <th scope="col">Cliente</th>
+  <th scope="col">Fecha</th>
+  <th scope="col">Total</th>
+  <th scope="col">Descripcion</th>
+
+</tr>
+{% endblock %}
+
+{% block filas %}
+{% for p in object_list %}
+<tr>
+  
+  <td> {{ p.id }}</td>
+  <td> {{ p.cliente }}</td>
+  <td> {{ p.fecha }}</td>
+  <td> {{ p.total }}</td>
+  <td> {{ p.telefono }}</td>
+  <td> {{ p.nit }}</td>
+
+
+  <td><a href="{% url 'cotizacioneliminar' p.id %}" class="btn btn-primary btn-sm">Editar</a>
+    <a href="{% url 'cotizacioneliminar' p.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+    <button rel="detalles" class="btn btn-success">Detalle</a>
+  </td>
+</tr> 
+{% endfor %}
+
+{% endblock %}
