@@ -1,7 +1,7 @@
 django>=3.2,<3.3
 django-widget-tweaks
 gunicorn
-psycopg2-binary
+psycopg2
 django-dotenv
 django-htmx
 pint
