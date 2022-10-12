@@ -1,7 +1,7 @@
 from django.forms import *
 from datetime import datetime
 from django import forms
-from .models import Articulo, Cotizacion, Material, Persona, Cliente, Proveedores
+from .models import Articulo, Cotizacion, Empleado, Envios, Material, Ordendetrabajo, Persona, Cliente, Proveedores
 #formulario persona
 class PersonaForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -81,6 +81,12 @@ class ArticuloForm(ModelForm):
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off' #esto es para aplicar formato recorriendo mis fields
             
+            
+            self.fields['precio'].widget.attrs = {
+            'readonly': False,
+            'class': 'form-control',
+            
+        }
     class Meta:
         model = Articulo
         fields = '__all__'
@@ -91,6 +97,7 @@ class ArticuloForm(ModelForm):
                     'placeholder': 'Ingrese nombre',
                     
                 }
+                
             ),
             
         }        
@@ -115,7 +122,8 @@ class MaterialForm(ModelForm):
                 }
             ),
             
-        }        
+        }  
+              
    
 #formulario cotizacion
 
@@ -160,3 +168,76 @@ class CotizacionForm(ModelForm):
    
              )
         }
+
+
+class ordendetrabajoForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off' #esto es para aplicar formato recorriendo mis fields
+            
+    class Meta:
+        model = Ordendetrabajo
+        fields = '__all__'
+
+        widgets = { #me permite personalizar mi componentes de mi from en mi html
+            'nombre': TextInput(
+                attrs= {
+                    'placeholder': 'Ingrese nombre',
+                    
+                }
+            ),
+             'fecha_empieza': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={
+                    'value': datetime.now().strftime('%Y-%m-%d'),
+                    'autocomplete': 'off',
+                    'class': 'form-control datetimepicker-input',
+                    'id': 'fecha_empieza',
+                    'data-target': '#fecha',
+                    'data-toggle': 'datetimepicker'
+        }        
+   
+             ),
+             'fecha_termina': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={
+                    'value': datetime.now().strftime('%Y-%m-%d'),
+                    'autocomplete': 'off',
+                    'class': 'form-control datetimepicker-input',
+                    'id': 'fecha_termina',
+                    'data-target': '#fecha',
+                    'data-toggle': 'datetimepicker'
+        }        
+   
+             )
+        }  
+
+#formulario empleado
+class EmpleadoForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off' #esto es para aplicar formato recorriendo mis fields
+            
+    class Meta:
+        model = Empleado
+        fields = '__all__'
+
+
+#formulario enviu
+class EnviosForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off' #esto es para aplicar formato recorriendo mis fields
+            
+    class Meta:
+        model = Envios
+        fields = '__all__'
+
+        
+        

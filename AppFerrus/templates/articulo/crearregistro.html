@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 
-    <script src="{% static '/js/form.js' %}"></script>
+    <script src="{% static '/js/formarticulo.js' %}"></script>
     
 
 {% endblock %}
@@ -53,7 +53,7 @@
                 <div class="col-lg-8">
                     <div class="card card-secondary">
                         <div class="card-header">
-                            <h3 class="card-title"></i> Orden de trabajo</h3>
+                            <h3 class="card-title"></i> Creacion articulo</h3>
                         </div>
                         <div class="card-body">
                             <input type="hidden" name="action" value="{{ action }}"> <!--para que reciba el action en mi vista-->
@@ -76,19 +76,18 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr>
-                            <button type="button" class="btn btn-danger  btnRemoveAll">
-                                Eliminar todos mis items
-                            </button>
-                            <hr>
+                           
                             <table class="table table-bordered" id="tblarticulo">
                                 <thead>
                                 <tr>
                                     <th>Eliminar</th>
-                                    <th>Producto</th>
-                                    
-            
+                                    <th>Material</th>
+                                    <th>Descripcion</th>
+                                    <th>Precio</th>
                                     <th>Cantidad</th>
+                                    <th>Subtotal</th>
+                     
+                                    
                                    
                                 </tr>
                                 </thead>
@@ -101,7 +100,7 @@
                 <div class="col-lg-4">
                     <div class="card card-secondary">
                         <div class="card-header">
-                            <h3 class="card-title"> Datos orden de trabajo</h3>
+                            <h3 class="card-title"> Datos Articulo</h3>
                         </div>
                         <div class="card-body">
                             <input type="hidden" name="action" value="{{ action }}">
@@ -117,36 +116,46 @@
                                 <label>Subtotal:</label>
                                 {{ form.subtotal }}
                             </div>
-                            <div class="form-group">
-                                <label>Porciento</label>
-                                {{ form.porciento }}
-                            </div>
+                           
                             <div class="form-group">
                                 <label>Mano de obra:</label>
-                                {{ form.porciento }}
+                                {{ form.mano_de_obra }}
                             </div>
                             <div class="form-group">
                                 <label>Otros Gastos:</label>
-                                {{ form.porciento }}
+                                {{ form.otrosgastos }}
                             </div>
+                            
                             <div class="form-group">
-                                <label>Observaciones</label>
-                                <input type="text" class="form-control" readonly name="porcientocal" value="0.00">
-                            </div>
-                            <div class="form-group">
-                                <label>Cliente</label>
-                                {{ form.cliente }}
+                                <label>Nombre</label>
+                                {{ form.nombre}}
                             </div>
                         </div>
-                    
                         <div class="form-group">
-                            <label>Precio:</label>
-                            {{ form.terminos }}
+                            <label>Porciento</label>
+                            {{ form.porciento }}
+                        </div>
+                        <div class="form-group">
+                            <label>Porciento calculado</label>
+                            <input type="text" class="form-control" readonly name="porcientocal" value="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Toltal otros gastos</label>
+                            <input type="text" class="form-control" readonly name="totalotrosgastos" value="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Varios calculado</label>
+                            <input type="text" class="form-control" readonly name="vartotal" value="0.00">
                         </div>
 
                         <div class="form-group">
-                            <label>Descripcion:</label>
-                            {{ form.terminos }}
+                            <label>Precio:</label>
+                            {{ form.precio }}
+                        </div>
+
+                        <div class="form-group">
+                            <label >Descripcion:</label>
+                            {{ form.descripcion }}
                         </div>
                         </div>
                     </div>

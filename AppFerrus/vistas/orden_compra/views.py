@@ -51,7 +51,7 @@ class orden_compraCreateView(CreateView):
         try:
             action = request.POST['action']
             print(request.POST)
-            if action == 'search_articulo': #la variable de mi form js
+            if action == 'search_material': #la variable de mi form js
                 data = [] #esto porque es un array
                 articulos = Material.objects.filter(nombre__icontains=request.POST['variablebusqueda'])[0:10] #limitante de mostrar
                 for i in articulos:

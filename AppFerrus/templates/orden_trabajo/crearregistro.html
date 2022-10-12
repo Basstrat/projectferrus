@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 
-    <script src="{% static '/js/form.js' %}"></script>
+    <script src="{% static '/js/formtrabajo.js' %}"></script>
     
 
 {% endblock %}
@@ -58,7 +58,7 @@
                         <div class="card-body">
                             <input type="hidden" name="action" value="{{ action }}"> <!--para que reciba el action en mi vista-->
                             <div class="form-group">
-                                <label>Buscador empleados:</label>
+                                <label>Buscador articulos:</label>
                                 <div class="input-group">
                                        <input type="text" class="form-control" autocomplete="off"
                                                placeholder="Ingrese una descripción" maxlength="50" name="buscar">
@@ -76,18 +76,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr>
-                            <button type="button" class="btn btn-danger  btnRemoveAll">
-                                Eliminar todos mis items
-                            </button>
-                            <hr>
+                            
                             <table class="table table-bordered" id="tblarticulo">
                                 <thead>
                                 <tr>
                                     <th>Eliminar</th>
                                     <th>Producto</th>
-                                    
-            
+                                    <th>Descripcion</th>
                                     <th>Cantidad</th>
                                    
                                 </tr>
@@ -106,30 +101,31 @@
                         <div class="card-body">
                             <input type="hidden" name="action" value="{{ action }}">
                             <div class="form-group">
-                                <label>Fecha:</label>
-                                {{ form.fecha }}
+                                <label>Fecha empieza:</label>
+                                {{ form.fecha_empieza }}
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha termina:</label>
+                                {{ form.fecha_termina }}
                             </div>
                            
                             <div class="form-group">
                                 <label>Encargado</label>
                                 <div class="input-group">
-                                    {{ form.empleado }}
+                                    {{ form.persona }}
                                     
                                 </div>
 
                             </div>
                             <div class="form-group">
                                 <label>No. Orden de trabajo:</label>
-                                {{ form.subtotal }}
+                                {{ form.idordendetrabajo }}
                             </div>
                             <div class="form-group">
-                                <label>Descripcion</label>
-                                {{ form.porciento }}
+                                <label>Definicion</label>
+                                {{ form.definicion }}
                             </div>
-                            <div class="form-group">
-                                <label>Observaciones</label>
-                                <input type="text" class="form-control" readonly name="porcientocal" value="0.00">
-                            </div>
+                            
                             <div class="form-group">
                                 <label>Cliente</label>
                                 {{ form.cliente }}
@@ -137,8 +133,8 @@
                         </div>
                     
                         <div class="form-group">
-                            <label>Terminos:</label>
-                            {{ form.terminos }}
+                            <label>Estado</label>
+                            {{ form.estado }}
                         </div>
                         </div>
                     </div>

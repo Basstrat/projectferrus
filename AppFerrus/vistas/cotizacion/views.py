@@ -3,7 +3,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
 from AppFerrus.models import Cotizacion
 from AppFerrus.forms import CotizacionForm
 from django.urls import reverse_lazy
@@ -13,7 +13,13 @@ import json
 from AppFerrus.models import Articulo
 from AppFerrus.models import Detcotizacion
 
-
+#librerias para pdf
+import os
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.contrib.staticfiles import finders
 
 
 
@@ -23,7 +29,7 @@ class Cotizacionlistview(ListView):
     template_name = 'cotizacion/lista.html' # este es el que uso para mi listado
 
 
-    @method_decorator(login_required)
+    #@method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs): 
         return super().dispatch(request, *args, **kwargs)
   
@@ -132,3 +138,10 @@ class cotizacionDeleteView(DeleteView):
         context['crear_url'] =  reverse_lazy('eliminaregistro')
         context['lista_url'] = self.success_url
         return context 
+
+
+
+class cotizacionPdfView(View):
+    def get(self, request, *args, **kwargs):
+        return HttpResponse('Hello world')
+

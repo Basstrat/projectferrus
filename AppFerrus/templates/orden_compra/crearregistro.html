@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 
-    <script src="{% static '/js/form.js' %}"></script>
+    <script src="{% static '/js/formcompra.js' %}"></script>
     
 
 {% endblock %}
@@ -53,12 +53,12 @@
                 <div class="col-lg-8">
                     <div class="card card-secondary">
                         <div class="card-header">
-                            <h3 class="card-title"></i> Detalle orden de compra</h3>
+                            <h3 class="card-title"></i> Orden de compra </h3>
                         </div>
                         <div class="card-body">
                             <input type="hidden" name="action" value="{{ action }}"> <!--para que reciba el action en mi vista-->
                             <div class="form-group">
-                                <label>Buscador de articulos:</label>
+                                <label>Buscador material:</label>
                                 <div class="input-group">
                                        <input type="text" class="form-control" autocomplete="off"
                                                placeholder="Ingrese una descripción" maxlength="50" name="buscar">
@@ -67,7 +67,7 @@
                                         
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item btnSearchProducts">
-                                                Buscar productos
+                                                Buscar material
                                             </a>
                                             <a class="dropdown-item btnClearSearch">
                                                  Limpiar búsqueda
@@ -76,16 +76,23 @@
                                     </div>
                                 </div>
                             </div>
-                          
+                            <hr>
+                            <button type="button" class="btn btn-danger  btnRemoveAll">
+                                Eliminar todos mis items
+                            </button>
+                            <hr>
                             <table class="table table-bordered" id="tblarticulo">
                                 <thead>
                                 <tr>
                                     <th>Eliminar</th>
-                                    <th>Material</th>
-                                    <th>Stock</th>
-                                    <th>Precio Unitario</th>
+                                    <th>Producto</th>
+                            
+                                    <th>Precio</th>
+            
                                     <th>Cantidad</th>
-                                    <th>Subtotal</th>
+                     
+                                    
+                                   
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -102,32 +109,37 @@
                         <div class="card-body">
                             <input type="hidden" name="action" value="{{ action }}">
                             <div class="form-group">
-                                <label>Fecha cotizacion:</label>
+                                <div class="form-group">
+                                    <label>Usuario:</label>
+                                    {{ user.username}}
+                                </div>
+                                <label>Fecha:</label>
                                 {{ form.fecha }}
                             </div>
                            
-                            <div class="form-group">
-                                <label>Proveedor</label>
-                                <div class="input-group">
-                                    {{ form.cliente }}
-                                    
-                                </div>
+                           
 
                             </div>
                             <div class="form-group">
                                 <label>Subtotal:</label>
-                                {{ form.subtotal }}
+                                Q {{ form.subtotal }}
                             </div>
+                           
                             
-                            
+                           
                             <div class="form-group">
-                                <label>Total a pagar:</label>
-                                {{ form.total }}
+                                <label>Proveedor</label>
+                                Q {{ form.cliente}}
                             </div>
                         </div>
-                    
+                       
                         <div class="form-group">
-                            <label>Observaciones</label>
+                            <label>Total compra:</label>
+                            {{ form.total }}
+                        </div>
+
+                        <div class="form-group">
+                            <label >Observaciones</label>
                             {{ form.terminos }}
                         </div>
                         </div>

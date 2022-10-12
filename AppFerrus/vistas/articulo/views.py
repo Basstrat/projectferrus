@@ -37,7 +37,8 @@ class articuloCreateView(CreateView):
     success_url = reverse_lazy('articulolista') #direccion hacia donde voy a redireccionar
     
     #aqui viy a definir para cuando se aguarde un dato repetido
-    @method_decorator(login_required)
+    #@method_decorator(login_required)
+    @method_decorator(csrf_exempt) 
     def dispatch(self, request, *args, **kwargs): 
         return super().dispatch(request, *args, **kwargs)
 
@@ -47,7 +48,7 @@ class articuloCreateView(CreateView):
             action = request.POST['action']
             if action == 'search_material': #la variable de mi form js
                 data = [] #esto porque es un array
-                materiales = Cliente.objects.filter(nombre__icontains=request.POST['variablebusqueda'])[0:10] #limitante de mostrar
+                materiales = Material.objects.filter(nombre__icontains=request.POST['variablebusqueda'])[0:10] #limitante de mostrar
                 for i in materiales:
                     item = i.toJSON() #aqui llamo a mi json de mis modelos
                     item['value'] = i.nombre #esto me retornara lo que busco

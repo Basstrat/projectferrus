@@ -5,12 +5,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from AppFerrus.models import Ordendetrabajo, Cotizacion, Articulo
-from AppFerrus.forms import CotizacionForm
+from AppFerrus.forms import ordendetrabajoForm
 from django.urls import reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
 import json
 
 from AppFerrus.models import Articulo
+from AppFerrus.models import Detordentrabajo
+
 
 
 
@@ -35,8 +37,8 @@ class orden_trabajolistview(ListView):
 #este es para mi formulario
 
 class orden_trabajoCreateView(CreateView):
-    model = Cotizacion #aqui llamo a mi modelo
-    form_class = CotizacionForm #aqui llamo a mi form de fomrs.py
+    model = Ordendetrabajo #aqui llamo a mi modelo
+    form_class = ordendetrabajoForm #aqui llamo a mi form de fomrs.py
     template_name = 'orden_trabajo/crearregistro.html' #direccion de la pagina que voy usar
     success_url = reverse_lazy('orden_trabajolista') #direccion hacia donde voy a redireccionar
     @method_decorator(csrf_exempt) 
@@ -62,28 +64,26 @@ class orden_trabajoCreateView(CreateView):
             elif action == 'add': #para añadir mi registro
                 print(request.POST)
                 cotizacion1 = json.loads(request.POST['cotizacion1'])
-                cotizacion = Cotizacion()
-                cotizacion.fecha = cotizacion1['fecha']
-                cotizacion.cliente_id = cotizacion1['cliente']
-                cotizacion.subtotal = float(cotizacion1['subtotal'])
-                cotizacion.total = float(cotizacion1['total'])
-                cotizacion.porciento = float(cotizacion1['porciento'])
-                cotizacion.terminos = cotizacion1['terminos']
-                cotizacion.save()
+                ordendetrabajo = Ordendetrabajo()
+                ordendetrabajo.definicion = cotizacion1['definicion']
+                ordendetrabajo.idordendetrabajo = cotizacion1['idordendetrabajo']
+                ordendetrabajo.cliente_id = cotizacion1['cliente']
+                ordendetrabajo.fecha_empieza = cotizacion1['fecha_empieza']
+                ordendetrabajo.fecha_termina = cotizacion1['fecha_termina'] 
+                ordendetrabajo.estado = cotizacion1['estado']           
+                ordendetrabajo.save()
                 
     #iterar productos
                 for i in cotizacion1['articulo']:
-                    det = Detcotizacion()
-                    det.cotizacion_id = cotizacion.id
+                    det = Detordentrabajo()
+                    det.ordendetrabajo_id = ordendetrabajo.idordendetrabajo
                     det.articulo_id = i['idarticulo']
                     det.cant = int(i['cant'])
-                    det.precio = float(i['precio'])
-                    det.subtotal = float(i['subtotal'])
                     det.save()
-                
-                    
+                 
             else:
                 data['error'] = 'Ha ocurrido un error'
+
         except Exception as e:
                 data['error'] = str(e)
         return JsonResponse(data, safe=False) # para serializarlos cuando es coleccion de elemento ponemos false

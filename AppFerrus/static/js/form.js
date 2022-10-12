@@ -170,10 +170,6 @@ $('input[name="buscar"]').autocomplete({ //nombre de mi barra de busqueda
     }
 });
 
-$('.btnRemoveAll').on('click', function(){
-    alert('x');
-
-});
 
 
 //evento cantidad articulos  //al cambio y que se actulizce
