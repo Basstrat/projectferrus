@@ -148,7 +148,7 @@ $('form').on('submit', function (e){
     parameters.append('action', $('input[name="action"]').val()); //aqui mando los parametros dek html con append
     parameters.append('cotizacion1', JSON.stringify(cotizacion1.items)); //para convertir json a string
     submit_with_ajax(window.location.pathname, 'Notificacion', 'Desea guardar?', parameters, function (){
-        location.href =  '/erp/cotizacion/listado/';
+        location.href =  '/erp/orden_trabajo/listado/';
     })
 
 

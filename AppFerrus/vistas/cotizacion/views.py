@@ -66,6 +66,10 @@ class CotizacionCreateView(CreateView):
                     item = i.toJSON() #aqui llamo a mi json de mis modelos
                     item['value'] = i.nombre #esto me retornara lo que busco
                     data.append(item) #item es lo que va tirar la busqueda
+            elif action == 'searchdetails_prod':
+                data= []
+                for i in Detcotizacion.objects.filter(Cotizacion_id=request.POST['id']):
+                    data.append(i.toJSON())
 
             elif action == 'add': #para añadir mi registro
                 print(request.POST)

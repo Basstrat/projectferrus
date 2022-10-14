@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 
-    <script src="{% static '/js/form.js' %}"></script>
+    <script src="{% static '/js/formventa.js' %}"></script>
     
 
 {% endblock %}
@@ -81,11 +81,12 @@
                                 <thead>
                                 <tr>
                                     
+                                    <th>Eliminar</th>
                                     <th>Producto</th>
-        
+                                    <th>Descripcion</th>
                                     <th>Precio Unitario</th>
                                     <th>Cantidad</th>
-                                    <th>Subtotal</th>
+                                    <th>Subtotal</th>>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -119,13 +120,11 @@
                                 {{ form.subtotal }}
                             </div>
                             <div class="form-group">
-                                <label>Porciento:</label>
-                                {{ form.porciento }}
+                                <label>No.</label>
+                                {{ form.idventa }}
                             </div>
-                            <div class="form-group">
-                                <label>Prociento Calculado:</label>
-                                <input type="text" class="form-control" readonly name="porcientocal" value="0.00">
-                            </div>
+                           
+                          
                             <div class="form-group">
                                 <label>Total a pagar:</label>
                                 {{ form.total }}
@@ -133,8 +132,8 @@
                         </div>
                     
                         <div class="form-group">
-                            <label>Terminos:</label>
-                            {{ form.terminos }}
+                            <label>Estado:</label>
+                            {{ form.estado }}
                         </div>
                         </div>
                     </div>

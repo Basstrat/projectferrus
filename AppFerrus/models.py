@@ -70,12 +70,13 @@ class Articulo(models.Model):
     cantidad_material = models.FloatField(blank=True, null=True)
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     porciento = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
-
+    stock = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     def __str__(self):
         return self.nombre
 
     def toJSON(self):
         item = model_to_dict(self)
+        item['idarticulo'] = format(self.idarticulo, '.2f')
         item['precio'] = float(self.precio)
         item['mano_de_obra'] = float(self.mano_de_obra) 
         item['otrosgastos'] = float(self.otrosgastos)
@@ -104,7 +105,7 @@ class Detarticulo(models.Model):
     def toJSON(self):
         item = model_to_dict(self, exclude=['articulo'])
         item['material'] = self.material.toJSON()
-        item['precio'] = format(self.price, '.2f')
+        item['precio'] = format(self.precio, '.2f')
         item['subtotal'] = format(self.subtotal, '.2f')
         return item
 
@@ -198,16 +199,39 @@ class Proveedores(models.Model):
 
 class OrdenCompraMaterial(models.Model):
     idorden_compra_material = models.IntegerField(primary_key=True, unique=True)
-    total = models.CharField(max_length=45, blank=True, null=True)
+    total = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     descripcion = models.CharField(max_length=45, blank=True, null=True)
     observaciones = models.CharField(max_length=45, blank=True, null=True)
     proveedor = models.ForeignKey(Proveedores, on_delete=models.CASCADE, default=0)
+    fecha = models.DateField(default=datetime.now, verbose_name='Fecha_venta')
+    subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     class Meta:
         verbose_name = 'OrdenCompraMaterial'
         verbose_name_plural = 'OrdenCompraMateriales'
         ordering = ['idorden_compra_material']
      
+class DetOrdenCompra(models.Model):
+        
+    idorden_compra_material = models.ForeignKey(OrdenCompraMaterial, on_delete=models.CASCADE)
+    articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
+    precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    cant = models.IntegerField(default=0)
+    subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
+    def __str__(self):
+        return self.prod.name
+
+    def toJSON(self):
+        item = model_to_dict(self, exclude=['cotizacion'])
+        item['articulo'] = self.articulo.toJSON()
+        item['precio'] = format(self.price, '.2f')
+        item['subtotal'] = format(self.subtotal, '.2f')
+        return item
+
+    class Meta:
+        verbose_name = 'Detalle cotizacion'
+        verbose_name_plural = 'Detalle cotizaciones'
+        ordering = ['id']
 
 
     
@@ -294,16 +318,48 @@ class EstadoVenta(models.Model):
 
 class Venta(models.Model):
     idventa = models.IntegerField(primary_key=True, unique=True)
-    hora_fecha = models.DateTimeField(blank=True, null=True)
-    estado = models.CharField(max_length=45, blank=True, null=True)
     fecha = models.DateField(default=datetime.now, verbose_name='Fecha_venta')
-    cotizacion = models.OneToOneField(Cotizacion, on_delete=models.CASCADE, db_column='idcotizacion', default=0, related_name='ventacotizacion')
-    cliente = models.OneToOneField(Cotizacion, on_delete=models.CASCADE, db_column='cliente', default=0, related_name='ventaclientecotizacion')
-    articulo = models.ForeignKey(Cotizacion, on_delete=models.CASCADE, db_column='articulo', default=0, related_name='ventaarticulocotizacion')
+    estado =models.ForeignKey(EstadoVenta, on_delete=models.CASCADE, db_column='articulo', default=0, related_name='ventaarticulocotizacion')
+    cliente = models.OneToOneField(Cliente, on_delete=models.CASCADE, db_column='cliente', default=0, related_name='ventaclientecotizacion')
+    subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    total = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        item['cliente'] = self.cliente.toJSON()
+        item['fecha'] = self.fecha.strftime('%Y-%m-%d')
+        item['estado'] = self.estado.toJSON()
+        item['subtotal'] = format(self.subtotal, '.2f')
+        item['total'] = format(self.total, '.2f')
+        item['idventa'] = format(self.idventa, '.2f')
+        item['det'] = [i.toJSON() for i in self.detventa_set.all()]
+
+    
     class Meta:
         verbose_name = 'Venta'
         verbose_name_plural = 'Ventas'
         ordering = ['idventa']
+
+class Detventa(models.Model):
+        
+    idventa = models.ForeignKey(Venta, on_delete=models.CASCADE)
+    articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
+    cant = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.prod.name
+
+    def toJSON(self):
+        item = model_to_dict(self, exclude=['cotizacion'])
+        item['articulo'] = self.articulo.toJSON()
+        item['precio'] = format(self.price, '.2f')
+        item['subtotal'] = format(self.subtotal, '.2f')
+        return item
+
+    class Meta:
+        verbose_name = 'Detalle Venta'
+        verbose_name_plural = 'Detalle Ventas'
+        ordering = ['id']
              
 class Ordendetrabajo(models.Model):
     idordendetrabajo = models.IntegerField(primary_key=True, unique=True)
@@ -361,10 +417,38 @@ class Envios(models.Model):
     fecha = models.DateField(default=datetime.now)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, default=0)
     persona = models.ForeignKey(Persona, on_delete=models.CASCADE,  default=0)
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        item['cliente'] = self.cliente.toJSON()
+        item['persona'] = self.persona.toJSON()
+        item['observaciones'] = self.definicion.toJSON()
+        item['idenvios'] = format(self.idenvios, '.2f')
+        item['fecha'] = self.fecha.strftime('%Y-%m-%d')
+        item['det'] = [i.toJSON() for i in self.detenvios_set.all()]
+
+    
     class Meta:
         verbose_name = 'Envio'
         verbose_name_plural = 'Envios'
         ordering = ['idenvios']
             
+class Detenvios(models.Model):
+        
+    idenvios = models.ForeignKey(Envios, on_delete=models.CASCADE)
+    articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
+    cant = models.IntegerField(default=0)
 
+    def __str__(self):
+        return self.prod.name
+
+    def toJSON(self):
+        item = model_to_dict(self, exclude=['venta'])
+        item['articulo'] = self.articulo.toJSON()
+        return item
+
+    class Meta:
+        verbose_name = 'Detalle envio'
+        verbose_name_plural = 'Detalle envios'
+        ordering = ['id']
        

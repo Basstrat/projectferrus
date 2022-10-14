@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from AppFerrus.models import Ordendetrabajo, Cotizacion, Articulo, Envios
+from AppFerrus.models import Detenvios, Ordendetrabajo, Cotizacion, Articulo, Envios
 from AppFerrus.forms import ordendetrabajoForm, EnviosForm
 from django.urls import reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
@@ -73,8 +73,8 @@ class EnviosCreateView(CreateView):
                 
     #iterar productos
                 for i in cotizacion1['articulo']:
-                    det = Detcotizacion()
-                    det.cotizacion_id = cotizacion.id
+                    det = Detenvios()
+                    det.envios_id = Envios.idenvios
                     det.articulo_id = i['idarticulo']
                     det.cant = int(i['cant'])
                     det.precio = float(i['precio'])

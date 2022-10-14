@@ -1,12 +1,13 @@
 var tblarticulos;
 var cotizacion1 = {
     items:  {
+    idarticulo: 0.00,
     nombre: '',
     descripcion: '',
     mano_de_obra: 0.00,
     otrosgastos: 0.00,
     subtotal: 0.00,
-    precio_unidad: 0.00,
+    precio: 0.00,
     porciento: 0.00,
     material: [],
     subtotal: 0.00,
@@ -236,14 +237,21 @@ $('#tblarticulo tbody')
 $('form').on('submit', function (e){
     e.preventDefault();
     cotizacion1.items.fecha = $('input[name="fecha"]').val(); //aqui llamo a los valores de mis inputs html
-    cotizacion1.items.cliente = $('select[name="cliente"]').val();
-    cotizacion1.items.terminos = $('input[name="terminos"]').val();
+    cotizacion1.items.nombre = $('input[name="nombre"]').val();
+    cotizacion1.items.descripcion = $('input[name="descripcion"]').val();
+    cotizacion1.items.idarticulo = $('input[name="idarticulo"]').val();
+    cotizacion1.items.precio = $('input[name="precio"]').val();
     var parameters = new FormData();
 
     parameters.append('action', $('input[name="action"]').val()); //aqui mando los parametros dek html con append
     parameters.append('cotizacion1', JSON.stringify(cotizacion1.items)); //para convertir json a string
+    
+    for (const pair of parameters.entries()) {
+        console.log(`${pair[0]}, ${pair[1]}`);
+    }
+    
     submit_with_ajax(window.location.pathname, 'Notificacion', 'Desea guardar?', parameters, function (){
-        location.href =  '/erp/cotizacion/listado/';
+        location.href =  '/erp/articulo/listado/';
     })
 
 

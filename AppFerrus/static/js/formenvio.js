@@ -1,17 +1,18 @@
 var tblarticulos;
 var cotizacion1 = {
     items:  {
-    idorden_compra_material: 0.00,
-    nombre: '',
-    observaciones: '',
+    terminos: '',
     subtotal: 0.00,
     total: 0.00,
+    porciento: 0.00,
+    cliente: '',
+    fecha: '',
     articulo: [],
-    subtotal: 0.00,
     },
     
     calcularcotizacion1: function() {
         var subtotal = 0.00;
+        var porciento = $('input[name="porciento"]').val();
         $.each(this.items.articulo, function (pos, dict) {//para recorrer articulo{
             console.log(pos);
             console.log(dict);
@@ -22,16 +23,18 @@ var cotizacion1 = {
         this.items.subtotal = subtotal; //aqui digo que la suma de articulos se igual a subtotal
         $('input[name="subtotal"]').val(this.items.subtotal);
         
-      
-        this.items.total = this.items.subtotal;
+        this.items.porciento = this.items.subtotal * porciento;
+        $('input[name="porcientocal"]').val(this.items.porciento.toFixed(2));
+
+        this.items.total = this.items.subtotal + this.items.porciento;
         $('input[name="total"]').val(this.items.total.toFixed(2));
 
 
-    },
        
 
 
-
+    },
+    
     list: function () {
         this.calcularcotizacion1();
         tblarticulos= $('#tblarticulo').DataTable( { //aqui asigno mi variable table
@@ -187,19 +190,19 @@ $('#tblarticulo tbody')
     $('td:eq(5)',tblarticulos.row(tr.row).node()).html('Q'+cotizacion1.items.articulo[tr.row].subtotal.toFixed(2));
 
 });
+
 //cuando guarde mi post
 $('form').on('submit', function (e){
     e.preventDefault();
     cotizacion1.items.fecha = $('input[name="fecha"]').val(); //aqui llamo a los valores de mis inputs html
     cotizacion1.items.cliente = $('select[name="cliente"]').val();
-    cotizacion1.items.observaciones = $('input[name="terminos"]').val();
-    cotizacion1.items.idorden_compra_material = $('input[name="idorden_compra_material"]').val();
+    cotizacion1.items.terminos = $('input[name="terminos"]').val();
     var parameters = new FormData();
 
     parameters.append('action', $('input[name="action"]').val()); //aqui mando los parametros dek html con append
     parameters.append('cotizacion1', JSON.stringify(cotizacion1.items)); //para convertir json a string
     submit_with_ajax(window.location.pathname, 'Notificacion', 'Desea guardar?', parameters, function (){
-        location.href =  '/erp/orden_compra/listado/';
+        location.href =  '/erp/envio/listado/';
     })
 
 

@@ -19,8 +19,10 @@
   <td> {{ p.nombre }}</td>
   <td> {{ p.precio }}</td>
 
-  <td>
+  <td><a href="{% url 'articuloeliminaregistro' p.idarticulo %}" class="btn btn-primary btn-sm">Editar</a>
     <a href="{% url 'articuloeliminaregistro' p.idarticulo %}" class="btn btn-danger btn-sm">Eliminar</a>
+    <button rel="detalles" class="btn btn-success btn-sm">Detalle</a>
+      <button rel="detalles" class="btn btn-warning btn-sm">Imprimir</a>
   </td>
 </tr> 
 {% endfor %}

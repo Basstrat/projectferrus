@@ -1,10 +1,11 @@
+import json
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from AppFerrus.models import Articulo, Material, Cliente
+from AppFerrus.models import Articulo, Detarticulo, Material, Cliente
 from AppFerrus.forms import ArticuloForm
 from django.urls import reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
@@ -45,6 +46,7 @@ class articuloCreateView(CreateView):
     def post(self, request, *args, **kwargs):
         data = {}
         try:
+            print(request.POST)
             action = request.POST['action']
             if action == 'search_material': #la variable de mi form js
                 data = [] #esto porque es un array
@@ -53,7 +55,26 @@ class articuloCreateView(CreateView):
                     item = i.toJSON() #aqui llamo a mi json de mis modelos
                     item['value'] = i.nombre #esto me retornara lo que busco
                     data.append(item) #item es lo que va tirar la busqueda
-            
+            elif action == 'add':
+                print(request.POST)
+                cotizacion1 = json.loads(request.POST['cotizacion1'])
+                articulo = Articulo()
+                articulo.idarticulo = cotizacion1['idarticulo']
+                articulo.nombre = cotizacion1['nombre']
+                articulo.fecha = cotizacion1['fecha']
+                articulo.precio = float(cotizacion1['precio'])
+                articulo.descripcion = cotizacion1['descripcion']
+                articulo.save()
+                
+    #iterar materiales
+                for i in cotizacion1['material']:
+                    det = Detarticulo()
+                    det.articulo_id = articulo.idarticulo
+                    det.material_id = i['idmaterial']
+                    det.cant = int(i['cant'])
+                    det.precio = float(i['precio_unidad'])
+                    det.subtotal = float(i['subtotal'])
+                    det.save()
             else:
                 data['error'] = 'Ha ocurrido un error 5'
         except Exception as e:
@@ -63,6 +84,7 @@ class articuloCreateView(CreateView):
     def get_context_data(self, **kwargs): 
         context= super().get_context_data(**kwargs)
         context['title'] = 'Crear una Articulo'
+        context['action'] = 'add'
         context['entity'] = 'Articulos' #titulo de la tabla y pestaña
         return context 
         #los decoradores pueden modificar de una forma dinamica una funcion

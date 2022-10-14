@@ -56,10 +56,12 @@ urlpatterns = [
     path('cotizacion/imprimir/<int:pk>/', cotizacionPdfView.as_view(), name = 'cotizacionpdf' ),
 
     path('orden_compra/crear/', orden_compraCreateView.as_view(), name = 'ordencompracrear' ),
-    path('orden_compra/listado/<int:pk>/', orden_compralistview.as_view(), name = 'ordencompralistado' ),
+    path('orden_compra/listado/', orden_compralistview.as_view(), name = 'ordencompralistado' ),
 
     path('orden_trabajo/crear/', orden_trabajoCreateView.as_view(), name = 'ordentrabajocrear' ),
     path('orden_trabajo/listado/', orden_trabajolistview.as_view(), name = 'ordentrabajolistado' ),
+    path('orden_trabajo/eliminar/<int:pk>/', cotizacionDeleteView.as_view(), name = 'cotizacioneliminar' ),
+
 
     path('venta/crear/', VentaCreateView.as_view(), name = 'ventacrear' ),
     path('venta/listado/', Ventalistview.as_view(), name = 'ventalistado' ),

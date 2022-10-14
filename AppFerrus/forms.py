@@ -1,7 +1,7 @@
 from django.forms import *
 from datetime import datetime
 from django import forms
-from .models import Articulo, Cotizacion, Empleado, Envios, Material, Ordendetrabajo, Persona, Cliente, Proveedores
+from .models import Articulo, Cotizacion, Empleado, Envios, Material, OrdenCompraMaterial, Ordendetrabajo, Persona, Cliente, Proveedores, Venta
 #formulario persona
 class PersonaForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -227,7 +227,7 @@ class EmpleadoForm(ModelForm):
         fields = '__all__'
 
 
-#formulario enviu
+#formulario envio
 class EnviosForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -238,6 +238,33 @@ class EnviosForm(ModelForm):
     class Meta:
         model = Envios
         fields = '__all__'
+    
 
-        
+
+#formulario enviu
+class VentaForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off' #esto es para aplicar formato recorriendo mis fields
+            
+    class Meta:
+        model = Venta
+        fields = '__all__'
+
+
+    
+
+#formulario orden de compra
+class OrdendecompraForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off' #esto es para aplicar formato recorriendo mis fields
+            
+    class Meta:
+        model = OrdenCompraMaterial
+        fields = '__all__'
         

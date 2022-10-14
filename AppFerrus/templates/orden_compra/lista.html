@@ -21,8 +21,10 @@
   <td> {{ p.Direccion }}</td>
 
 
-  <td><a href="{% url 'clienteeditarregistro' p.idcliente %}" class="btn btn-primary btn-sm">Editar</a>
-    <a href="{% url 'clienteeliminaregistro' p.idcliente %}" class="btn btn-danger btn-sm">Eliminar</a>
+  <td><a href="{% url 'cotizacioneliminar' p.id %}" class="btn btn-primary btn-sm">Editar</a>
+    <a href="{% url 'cotizacioneliminar' p.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+    <button rel="detalles" class="btn btn-success btn-sm">Detalle</a>
+      <button rel="detalles" class="btn btn-warning btn-sm">Imprimir</a>
   </td>
 </tr> 
 {% endfor %}

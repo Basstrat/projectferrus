@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from AppFerrus.models import OrdenCompraMaterial, Cotizacion
-from AppFerrus.forms import CotizacionForm
+from AppFerrus.models import OrdenCompraMaterial, Cotizacion, Detcotizacion, DetOrdenCompra
+from AppFerrus.forms import CotizacionForm, OrdendecompraForm
 from django.urls import reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
 import json
@@ -36,8 +36,8 @@ class orden_compralistview(ListView):
 #este es para mi formulario
 
 class orden_compraCreateView(CreateView):
-    model = Cotizacion #aqui llamo a mi modelo
-    form_class = CotizacionForm #aqui llamo a mi form de fomrs.py
+    model = OrdenCompraMaterial #aqui llamo a mi modelo
+    form_class = OrdendecompraForm #aqui llamo a mi form de fomrs.py
     template_name = 'orden_compra/crearregistro.html' #direccion de la pagina que voy usar
     success_url = reverse_lazy('cotizacionlistado') #direccion hacia donde voy a redireccionar
     
@@ -51,9 +51,9 @@ class orden_compraCreateView(CreateView):
         try:
             action = request.POST['action']
             print(request.POST)
-            if action == 'search_material': #la variable de mi form js
+            if action == 'search_articulo': #la variable de mi form js
                 data = [] #esto porque es un array
-                articulos = Material.objects.filter(nombre__icontains=request.POST['variablebusqueda'])[0:10] #limitante de mostrar
+                articulos = Articulo.objects.filter(nombre__icontains=request.POST['variablebusqueda'])[0:10] #limitante de mostrar
                 for i in articulos:
                     print(i.nombre)
                     item = i.toJSON() #aqui llamo a mi json de mis modelos
@@ -63,19 +63,19 @@ class orden_compraCreateView(CreateView):
             elif action == 'add': #para añadir mi registro
                 print(request.POST)
                 cotizacion1 = json.loads(request.POST['cotizacion1'])
-                cotizacion = Cotizacion()
-                cotizacion.fecha = cotizacion1['fecha']
-                cotizacion.cliente_id = cotizacion1['cliente']
-                cotizacion.subtotal = float(cotizacion1['subtotal'])
-                cotizacion.total = float(cotizacion1['total'])
-                cotizacion.porciento = float(cotizacion1['porciento'])
-                cotizacion.terminos = cotizacion1['terminos']
-                cotizacion.save()
+                ordencompra = OrdenCompraMaterial()
+                ordencompra.fecha = cotizacion1['fecha']
+                ordencompra.proveedor_id = cotizacion1['proveedor']
+                ordencompra.subtotal = float(cotizacion1['subtotal'])
+                ordencompra.total = float(cotizacion1['total'])
+                ordencompra.terminos = cotizacion1['terminos']
+                ordencompra.idorden_compra_material = cotizacion1['idorden_compra_material']
+                ordencompra.save()
                 
     #iterar productos
                 for i in cotizacion1['articulo']:
-                    det = Detcotizacion()
-                    det.cotizacion_id = cotizacion.id
+                    det = DetOrdenCompra()
+                    det.OrdenCompra_id = ordencompra.idorden_compra_material
                     det.articulo_id = i['idarticulo']
                     det.cant = int(i['cant'])
                     det.precio = float(i['precio'])
