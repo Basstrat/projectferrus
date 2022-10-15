@@ -13,8 +13,6 @@ var cotizacion1 = {
     calcularcotizacion1: function() {
         var subtotal = 0.00;
         $.each(this.items.articulo, function (pos, dict) {//para recorrer articulo{
-            console.log(pos);
-            console.log(dict);
             dict.subtotal = dict.cant * parseFloat(dict.precio);
             subtotal+=dict.subtotal //aqui sumo mi columna
          
@@ -71,7 +69,7 @@ var cotizacion1 = {
         class: 'text-center',
         orderable: false,
         render: function (data, type, row){
-            return '<input type="text" name="cant" class="form-control form-control-sm" autocomplete="off"> ';
+            return '<input type="text" name="cant" class="form-control form-control-sm" autocomplete="off" value="'+row.cant+'"> ';
     },
     },
     {
@@ -92,8 +90,7 @@ var cotizacion1 = {
             min: 1,
             max: 1000,
             step: 1
-        })
-        .val(1);
+        });
     },
     initComplete: function(settings, json){
     
@@ -168,6 +165,11 @@ $('input[name="buscar"]').autocomplete({ //nombre de mi barra de busqueda
 });
 
 
+$('.btnRemoveAll').on('click', function(){
+    cotizacion1.items.articulo = [];
+    cotizacion1.list();
+});
+
 
 //evento cantidad articulos  //al cambio y que se actulizce
 $('#tblarticulo tbody')
@@ -190,14 +192,9 @@ $('#tblarticulo tbody')
 //cuando guarde mi post
 $('form').on('submit', function (e){
     e.preventDefault();
-    cotizacion1.items.fecha = $('input[name="fecha"]').val(); //aqui llamo a los valores de mis inputs html
-    cotizacion1.items.cliente = $('select[name="cliente"]').val();
-    cotizacion1.items.observaciones = $('input[name="terminos"]').val();
-    cotizacion1.items.idorden_compra_material = $('input[name="idorden_compra_material"]').val();
-    var parameters = new FormData();
-
+    var parameters = new FormData(this);
     parameters.append('action', $('input[name="action"]').val()); //aqui mando los parametros dek html con append
-    parameters.append('cotizacion1', JSON.stringify(cotizacion1.items)); //para convertir json a string
+    parameters.append('products', JSON.stringify(cotizacion1.items.articulo)); //para convertir json a string
     submit_with_ajax(window.location.pathname, 'Notificacion', 'Desea guardar?', parameters, function (){
         location.href =  '/erp/orden_compra/listado/';
     })

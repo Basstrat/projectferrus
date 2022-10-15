@@ -4,16 +4,26 @@ var cotizacion1 = {
         idordendetrabajo: 0.00,
         definicion: '',
         cliente: '',
-        fecha_empieza: '',
-        fecha_termina: '',
+        fecha: '',
+        persona: '',
+        estado: '',
         articulo: [],
     },
     
     calcularcotizacion1: function() {
+        var subtotal = 0.00;
+        $.each(this.items.articulo, function (pos, dict) {//para recorrer articulo{
+            dict.subtotal = dict.cant * parseFloat(dict.precio);
+            subtotal+=dict.subtotal //aqui sumo mi columna
+         
+        });
 
 
     },
-    
+       
+
+
+
     list: function () {
         this.calcularcotizacion1();
         tblarticulos= $('#tblarticulo').DataTable( { //aqui asigno mi variable table
@@ -25,8 +35,9 @@ var cotizacion1 = {
                 {"data": "idarticulo" },
                 {"data": "nombre"},
                 {"data": "descripcion"},
-   
-      
+                {"data": "cantidad"},
+                
+               
             ],
             columnDefs: [
                 {
@@ -45,10 +56,12 @@ var cotizacion1 = {
         class: 'text-center',
         orderable: false,
         render: function (data, type, row){
-            return '<input type="text" name="cant" class="form-control form-control-sm" autocomplete="off"> ';
+            return '<input type="text" name="cant" class="form-control form-control-sm" autocomplete="off" value="'+row.cant+'"> ';
     },
     },
-    
+    {
+       
+    },
     
     ],
 
@@ -59,8 +72,7 @@ var cotizacion1 = {
             min: 1,
             max: 1000,
             step: 1
-        })
-        .val(1);
+        });
     },
     initComplete: function(settings, json){
     
@@ -87,7 +99,18 @@ $(function() {
 });
 
 
-
+$("input[name='porciento']").TouchSpin({
+    min: 0,
+    max: 100,
+    step: 0.01,
+    decimals: 2,
+    boostat: 5,
+    maxboostedstep: 10,
+    postfix: '%'
+}).on('change', function () { //cuando yo haga un cambio
+    cotizacion1.calcularcotizacion1();
+})
+    .val(0.12);
 
 //busqueda de productos
 $('input[name="buscar"]').autocomplete({ //nombre de mi barra de busqueda
@@ -124,6 +147,11 @@ $('input[name="buscar"]').autocomplete({ //nombre de mi barra de busqueda
 });
 
 
+$('.btnRemoveAll').on('click', function(){
+    cotizacion1.items.articulo = [];
+    cotizacion1.list();
+});
+
 
 //evento cantidad articulos  //al cambio y que se actulizce
 $('#tblarticulo tbody')
@@ -132,21 +160,23 @@ $('#tblarticulo tbody')
     cotizacion1.items.articulo.splice(tr.row, 1); //esta es mi posicion actual
     cotizacion1.list();
 })
+.on('change', 'input[name="cant"]', function() {
+    var cant = parseInt($(this).val()); //para guardar el dato que cambio a enteri
+    var tr = tblarticulos.cell($(this).closest('td, li')).index();
+    console.log(tr);
+    var data = tblarticulos.row(tr.row).node(); //ubicacion de mis cambios
+    console.log(data);
+    cotizacion1.items.articulo[tr.row].cant = cant; //aguardo la cantidad que cambie
+    cotizacion1.calcularcotizacion1();
+    $('td:eq(5)',tblarticulos.row(tr.row).node()).html('Q'+cotizacion1.items.articulo[tr.row].subtotal.toFixed(2));
 
-
+});
 //cuando guarde mi post
 $('form').on('submit', function (e){
     e.preventDefault();
-    cotizacion1.items.idordendetrabajo = $('input[name="idordendetrabajo"]').val();
-    cotizacion1.items.fecha_empieza = $('input[name="fecha_empieza"]').val();
-    cotizacion1.items.fecha_termina = $('input[name="fecha_termina"]').val(); //aqui llamo a los valores de mis inputs html
-    cotizacion1.items.cliente = $('select[name="cliente"]').val();
-    cotizacion1.items.estado = $('input[name="estado"]').val();
-    cotizacion1.items.definicion = $('input[name="definicion"]').val();
-    var parameters = new FormData();
-
+    var parameters = new FormData(this);
     parameters.append('action', $('input[name="action"]').val()); //aqui mando los parametros dek html con append
-    parameters.append('cotizacion1', JSON.stringify(cotizacion1.items)); //para convertir json a string
+    parameters.append('products', JSON.stringify(cotizacion1.items.articulo)); //para convertir json a string
     submit_with_ajax(window.location.pathname, 'Notificacion', 'Desea guardar?', parameters, function (){
         location.href =  '/erp/orden_trabajo/listado/';
     })
@@ -154,7 +184,6 @@ $('form').on('submit', function (e){
 
 })
 });
-
 
 
 

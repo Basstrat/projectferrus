@@ -10,7 +10,7 @@ from .vistas.proveedor.views import Proveedoreslistview, ProveedoresCreateView, 
 
 from .vistas.articulo.views import articulolistview, articuloCreateView, articuloDeleteView
 from .vistas.material.views import materiallistview, materialCreateView, materialUpdateView, materialDeleteView
-from .vistas.cotizacion.views import CotizacionCreateView, Cotizacionlistview, cotizacionDeleteView, cotizacionPdfView
+from .vistas.cotizacion.views import CotizacionCreateView, Cotizacionlistview, cotizacionDeleteView, cotizacionPdfView, cotizacionUpdateView
 from .vistas.orden_compra.views import orden_compraCreateView, orden_compralistview
 from .vistas.orden_trabajo.views import orden_trabajoCreateView, orden_trabajolistview
 from .vistas.venta.views import VentaCreateView, Ventalistview
@@ -52,7 +52,7 @@ urlpatterns = [
     path('cotizacion/crear/', CotizacionCreateView.as_view(), name = 'cotizacioncrear' ),
     path('cotizacion/listado/', Cotizacionlistview.as_view(), name = 'cotizacionlistado' ),
     path('cotizacion/eliminar/<int:pk>/', cotizacionDeleteView.as_view(), name = 'cotizacioneliminar' ),
-    path('cotizacion/crear/', CotizacionCreateView.as_view(), name = 'cotizacioneditar' ),
+    path('cotizacion/editar/<int:pk>/', cotizacionUpdateView.as_view(), name = 'cotizacioneditar' ),
     path('cotizacion/imprimir/<int:pk>/', cotizacionPdfView.as_view(), name = 'cotizacionpdf' ),
 
     path('orden_compra/crear/', orden_compraCreateView.as_view(), name = 'ordencompracrear' ),

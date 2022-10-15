@@ -108,6 +108,9 @@ var cotizacion1 = {
 
 
 
+
+
+
 $(function() {
     $('.select2').select2( {
         theme: "bootstrap4",

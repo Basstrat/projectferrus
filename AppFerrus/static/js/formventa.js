@@ -91,7 +91,7 @@ var cotizacion1 = {
         //row contien mis campos, y data la informacion
         $(row).find('input[name="cant"]').TouchSpin({
             min: 1,
-            max: 1000,
+            max: data.stock,
             step: 1
         })
         .val(1);
@@ -179,29 +179,16 @@ $('#tblarticulo tbody')
 //cuando guarde mi post
 $('form').on('submit', function (e){
     e.preventDefault();
-    cotizacion1.items.fecha = $('input[name="fecha"]').val(); //aqui llamo a los valores de mis inputs html
-    cotizacion1.items.cliente = $('select[name="cliente"]').val();
-    cotizacion1.items.estado = $('input[name="estado"]').val();
-    cotizacion1.items.idventa = $('input[name="idventa"]').val();
-    
-    var parameters = new FormData();
-
-   
+    var parameters = new FormData(this);
     parameters.append('action', $('input[name="action"]').val()); //aqui mando los parametros dek html con append
-    parameters.append('cotizacion1', JSON.stringify(cotizacion1.items)); //para convertir json a string
-    
-    for (const pair of parameters.entries()) {
-        console.log(`${pair[0]}, ${pair[1]}`);
-    }
-    
+    parameters.append('products', JSON.stringify(cotizacion1.items.articulo)); //para convertir json a string
     submit_with_ajax(window.location.pathname, 'Notificacion', 'Desea guardar?', parameters, function (){
-        location.href =  '/erp/cotizacion/listado/';
+        location.href =  '/erp/orden_compra/listado/';
     })
 
 
 })
 });
-
 
 
 

@@ -5,10 +5,11 @@
 #   * Make sure each OneToOneField and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+from unittest.util import _MAX_LENGTH
 from django.db import models
 from datetime import datetime
 from django.forms import model_to_dict
-
+from django.contrib.auth.models import AbstractBaseUser #donde va ehredar mi modelos usuario
        
 
 
@@ -76,7 +77,7 @@ class Articulo(models.Model):
 
     def toJSON(self):
         item = model_to_dict(self)
-        item['idarticulo'] = format(self.idarticulo, '.2f')
+        # item['idarticulo'] = format(self.idarticulo, '.2f')
         item['precio'] = float(self.precio)
         item['mano_de_obra'] = float(self.mano_de_obra) 
         item['otrosgastos'] = float(self.otrosgastos)
@@ -364,8 +365,7 @@ class Detventa(models.Model):
 class Ordendetrabajo(models.Model):
     idordendetrabajo = models.IntegerField(primary_key=True, unique=True)
     definicion = models.CharField(max_length=45, blank=True, null=True)
-    fecha_empieza = models.DateField(blank=True, null=True)
-    fecha_termina = models.DateField(blank=True, null=True)
+    fecha = models.DateField(blank=True, null=True)
     persona = models.ForeignKey(Persona, on_delete=models.CASCADE,  default=0)
     estado = models.ForeignKey(EstadoOrdentrabajo, on_delete=models.CASCADE,  default=0)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, default=0)
@@ -373,17 +373,14 @@ class Ordendetrabajo(models.Model):
     def __str__(self):
         return self.prod.name
 
-    def toJSON(self):
-        item = model_to_dict(self)
-        item['cliente'] = self.cliente.toJSON()
-        item['persona'] = self.persona.toJSON()
-        item['estado'] = self.estado.toJSON()
-        item['definicion'] = self.definicion.toJSON()
-        item['subtotal'] = format(self.subtotal, '.2f')
-        item['idordendetrabajo'] = format(self.total, '.2f')
-        item['fecha_empieza'] = self.fecha.strftime('%Y-%m-%d')
-        item['fecha_termina'] = self.fecha.strftime('%Y-%m-%d')
-        item['det'] = [i.toJSON() for i in self.detordentrabajo_set.all()]
+   # def toJSON(self):
+    #    item = model_to_dict(self)
+     #   item['persona'] = self.persona.toJSON()
+      #  item['estado'] = self.estado.toJSON()
+       # item['definicion'] = self.definicion.toJSON()
+        #item['idordendetrabajo'] = format(self.total, '.2f')
+        #item['fecha'] = self.fecha.strftime('%Y-%m-%d')
+        #item['det'] = [i.toJSON() for i in self.detordentrabajo_set.all()]
 
 class Meta:
         verbose_name = 'Ordendetrabajo'
@@ -451,4 +448,4 @@ class Detenvios(models.Model):
         verbose_name = 'Detalle envio'
         verbose_name_plural = 'Detalle envios'
         ordering = ['id']
-       
+   

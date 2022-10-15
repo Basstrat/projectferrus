@@ -52,6 +52,7 @@ class VentaCreateView(CreateView):
             if action == 'search_articulo': #la variable de mi form js
                 data = [] #esto porque es un array
                 articulos = Articulo.objects.filter(nombre__icontains=request.POST['variablebusqueda'])[0:10] #limitante de mostrar
+                articulos = Articulo.objects.filter(stock__gt=0) #unicamnete llamar articulo mayor a cero
                 for i in articulos:
                     item = i.toJSON() #aqui llamo a mi json de mis modelos
                     item['value'] = i.nombre #esto me retornara lo que busco
@@ -62,11 +63,11 @@ class VentaCreateView(CreateView):
                 cotizacion1 = json.loads(request.POST['cotizacion1'])
                 venta = Venta()
                 venta.fecha = cotizacion1['fecha']
-                venta.cliente = cotizacion1['cliente']
+                venta.cliente_id = cotizacion1['cliente']
                 venta.subtotal = float(cotizacion1['subtotal'])
                 venta.total = float(cotizacion1['total'])
-                venta.idventa = float(cotizacion1['idventa'])
-                venta.estado = float(cotizacion1['estado'])
+                venta.idventa = cotizacion1['idventa']
+                venta.estado_id = cotizacion1['estado']
                 venta.save()
     #iterar productos
                 for i in cotizacion1['articulo']:
@@ -77,12 +78,15 @@ class VentaCreateView(CreateView):
                     det.precio = float(i['precio'])
                     det.subtotal = float(i['subtotal'])
                     det.save()
+                    det.articulo.stock-=det.cant
+                    det.articulo.save()
             
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
                 data['error'] = str(e)
         return JsonResponse(data, safe=False) # para serializarlos cuando es coleccion de elemento ponemos false
+
 
     def get_context_data(self, **kwargs): 
         context= super().get_context_data(**kwargs)

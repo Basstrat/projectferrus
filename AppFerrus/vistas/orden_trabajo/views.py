@@ -59,27 +59,28 @@ class orden_trabajoCreateView(CreateView):
                     print(i.nombre)
                     item = i.toJSON() #aqui llamo a mi json de mis modelos
                     item['value'] = i.nombre #esto me retornara lo que busco
+                    item['cant'] = 1
                     data.append(item) #item es lo que va tirar la busqueda
-
             elif action == 'add': #para añadir mi registro
                 print(request.POST)
-                cotizacion1 = json.loads(request.POST['cotizacion1'])
-                ordendetrabajo = Ordendetrabajo()
-                ordendetrabajo.definicion = cotizacion1['definicion']
-                ordendetrabajo.idordendetrabajo = cotizacion1['idordendetrabajo']
-                ordendetrabajo.cliente_id = cotizacion1['cliente']
-                ordendetrabajo.fecha_empieza = cotizacion1['fecha_empieza']
-                ordendetrabajo.fecha_termina = cotizacion1['fecha_termina'] 
-                ordendetrabajo.estado = cotizacion1['estado']           
-                ordendetrabajo.save()
-                
-    #iterar productos
-                for i in cotizacion1['articulo']:
+                products = json.loads(request.POST['products'])
+                ordentrabajo = Ordendetrabajo()
+                ordentrabajo.fecha = request.POST['fecha']
+                ordentrabajo.estado_id = request.POST['estado']
+                ordentrabajo.cliente_id = request.POST['cliente']
+                ordentrabajo.persona_idpersona = (request.POST['persona'])
+                ordentrabajo.definicion = request.POST['definicion']
+                ordentrabajo.idordendetrabajo = request.POST['idordendetrabajo']
+                ordentrabajo.save()
+                for i in products:
                     det = Detordentrabajo()
-                    det.ordendetrabajo_id = ordendetrabajo.idordendetrabajo
+                    det.idordendetrabajo = ordentrabajo
                     det.articulo_id = i['idarticulo']
                     det.cant = int(i['cant'])
                     det.save()
+                    det.articulo.stock+=det.cant
+                    det.articulo.save()
+            
                  
             else:
                 data['error'] = 'Ha ocurrido un error'

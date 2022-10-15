@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
@@ -50,7 +51,6 @@ class orden_compraCreateView(CreateView):
         data = {}
         try:
             action = request.POST['action']
-            print(request.POST)
             if action == 'search_articulo': #la variable de mi form js
                 data = [] #esto porque es un array
                 articulos = Articulo.objects.filter(nombre__icontains=request.POST['variablebusqueda'])[0:10] #limitante de mostrar
@@ -58,31 +58,29 @@ class orden_compraCreateView(CreateView):
                     print(i.nombre)
                     item = i.toJSON() #aqui llamo a mi json de mis modelos
                     item['value'] = i.nombre #esto me retornara lo que busco
+                    item['cant'] = 1
                     data.append(item) #item es lo que va tirar la busqueda
-
             elif action == 'add': #para añadir mi registro
                 print(request.POST)
-                cotizacion1 = json.loads(request.POST['cotizacion1'])
+                products = json.loads(request.POST['products'])
                 ordencompra = OrdenCompraMaterial()
-                ordencompra.fecha = cotizacion1['fecha']
-                ordencompra.proveedor_id = cotizacion1['proveedor']
-                ordencompra.subtotal = float(cotizacion1['subtotal'])
-                ordencompra.total = float(cotizacion1['total'])
-                ordencompra.terminos = cotizacion1['terminos']
-                ordencompra.idorden_compra_material = cotizacion1['idorden_compra_material']
+                ordencompra.fecha = request.POST['fecha']
+                ordencompra.proveedor_id = request.POST['proveedor']
+                ordencompra.subtotal = float(request.POST['subtotal'])
+                ordencompra.total = float(request.POST['total'])
+                ordencompra.terminos = request.POST['observaciones']
+                ordencompra.idorden_compra_material = request.POST['idorden_compra_material']
                 ordencompra.save()
-                
-    #iterar productos
-                for i in cotizacion1['articulo']:
+                for i in products:
                     det = DetOrdenCompra()
-                    det.OrdenCompra_id = ordencompra.idorden_compra_material
+                    det.idorden_compra_material = ordencompra
                     det.articulo_id = i['idarticulo']
                     det.cant = int(i['cant'])
                     det.precio = float(i['precio'])
                     det.subtotal = float(i['subtotal'])
                     det.save()
-                
-                    
+                    det.articulo.stock+=det.cant
+                    det.articulo.save()
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -91,17 +89,9 @@ class orden_compraCreateView(CreateView):
 
     def get_context_data(self, **kwargs): 
         context= super().get_context_data(**kwargs)
-        context['title'] = 'Crear una Cotizacion'
-        context['entity'] = 'Cotizaciones' #titulo de la tabla y pestaña
-        context['action'] = 'add'
-        context['det'] = []
-        return context 
-        #los decoradores pueden modificar de una forma dinamica una funcion
-
-    def get_context_data(self, **kwargs): 
-        context= super().get_context_data(**kwargs)
         context['title'] = 'Crear una orden de compra'
         context['entity'] = 'Orden de compras' #titulo de la tabla y pestaña
+        context['action'] = 'add'
         return context 
         #los decoradores pueden modificar de una forma dinamica una funcion
 

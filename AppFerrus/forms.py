@@ -188,7 +188,7 @@ class ordendetrabajoForm(ModelForm):
                     
                 }
             ),
-             'fecha_empieza': forms.DateInput(
+             'fecha': forms.DateInput(
                 format='%Y-%m-%d',
                 attrs={
                     'value': datetime.now().strftime('%Y-%m-%d'),
@@ -200,18 +200,9 @@ class ordendetrabajoForm(ModelForm):
         }        
    
              ),
-             'fecha_termina': forms.DateInput(
-                format='%Y-%m-%d',
-                attrs={
-                    'value': datetime.now().strftime('%Y-%m-%d'),
-                    'autocomplete': 'off',
-                    'class': 'form-control datetimepicker-input',
-                    'id': 'fecha_termina',
-                    'data-target': '#fecha',
-                    'data-toggle': 'datetimepicker'
-        }        
+               
    
-             )
+            
         }  
 
 #formulario empleado
