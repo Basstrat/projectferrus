@@ -46,7 +46,7 @@ class orden_trabajoCreateView(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     #aqui viy a definir para cuando se aguarde un dato repetido
-    @method_decorator(login_required)
+
     def post(self, request, *args, **kwargs):
         data = {}
         try:
