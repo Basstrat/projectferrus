@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-g-o1(&=+&g4f-wwt_3lpy+usxt2j9p^_k56j3$df!=6yp!_-m)
 DEBUG = True
 
 ENV_ALLOWED_HOST = os.environ.get('DJANGO_ALLOWED_HOST') or None
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['seal-app-num7p.ondigitalocean.app']
 if not DEBUG:
     ALLOWED_HOSTS += [os.environ.get('DJANGO_ALLOWED_HOST')]
 
