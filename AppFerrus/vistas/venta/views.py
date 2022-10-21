@@ -14,18 +14,41 @@ from AppFerrus.models import Articulo
 from AppFerrus.models import Detcotizacion
 
 
-
-
-
-    #vista basada en clases
 class Ventalistview(ListView):
-    model = Cotizacion
-    template_name = 'cotizacion/listpersona.html' # este es el que uso para mi listado
+    model = Venta
+    template_name = 'venta/lista.html' # este es el que uso para mi listado
 
-  
-    @method_decorator(login_required)
-    def dispatch(self, request, *args, **kwargs): 
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'searchdata':
+                data = [] #es una array
+                for i in Venta.objects.all():
+                    data.append(i.toJSON()) #incrustar datos dentro del array
+                 
+            elif action == 'search_details_prod':
+                data = []
+                for i in Detcotizacion.objects.filter(idventa_id=request.POST['id']):
+                    data.append(i.toJSON())
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False) #safe= false para que maneje varios datos
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Listado Venta'
+        context['entity'] = 'Venta'
+        context['create_url'] = reverse_lazy('cotizacioncrear')
+        context['list_url'] = reverse_lazy('cotizacionlistado')
+        return context
+
 
 
 
@@ -51,8 +74,7 @@ class VentaCreateView(CreateView):
             action = request.POST['action']
             if action == 'search_articulo': #la variable de mi form js
                 data = [] #esto porque es un array
-                articulos = Articulo.objects.filter(nombre__icontains=request.POST['variablebusqueda'])[0:10] #limitante de mostrar
-                articulos = Articulo.objects.filter(stock__gt=0) #unicamnete llamar articulo mayor a cero
+                articulos = Articulo.objects.filter(nombre__icontains=request.POST['variablebusqueda'], stockenviado__gt=0)[0:10] #limitante de mostrar
                 for i in articulos:
                     item = i.toJSON() #aqui llamo a mi json de mis modelos
                     item['value'] = i.nombre #esto me retornara lo que busco
@@ -60,25 +82,25 @@ class VentaCreateView(CreateView):
 
             elif action == 'add': #para añadir mi registro
                 print(request.POST)
-                cotizacion1 = json.loads(request.POST['cotizacion1'])
+                products = json.loads(request.POST['products'])
                 venta = Venta()
-                venta.fecha = cotizacion1['fecha']
-                venta.cliente_id = cotizacion1['cliente']
-                venta.subtotal = float(cotizacion1['subtotal'])
-                venta.total = float(cotizacion1['total'])
-                venta.idventa = cotizacion1['idventa']
-                venta.estado_id = cotizacion1['estado']
+                venta.fecha = request.POST['fecha']
+                venta.cliente_id = request.POST['cliente']
+                venta.subtotal = float(request.POST['subtotal'])
+                venta.total = float(request.POST['total'])
+                venta.idventa = request.POST['idventa']
+                venta.estado_id = request.POST['estado']
                 venta.save()
     #iterar productos
-                for i in cotizacion1['articulo']:
+                for i in products:
                     det = Detventa()
-                    det.venta_id = venta.idventa
-                    det.articulo = i['articulo']
+                    det.idventa = venta
+                    det.articulo_id = i['idarticulo']
                     det.cant = int(i['cant'])
                     det.precio = float(i['precio'])
                     det.subtotal = float(i['subtotal'])
                     det.save()
-                    det.articulo.stock-=det.cant
+                    det.articulo.stockenviado-=det.cant
                     det.articulo.save()
             
             else:
@@ -92,6 +114,7 @@ class VentaCreateView(CreateView):
         context= super().get_context_data(**kwargs)
         context['title'] = 'Crear una Cotizacion'
         context['entity'] = 'Cotizaciones' #titulo de la tabla y pestaña
+        context['action'] = 'add'
         return context 
         #los decoradores pueden modificar de una forma dinamica una funcion
 

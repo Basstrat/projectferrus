@@ -179,6 +179,14 @@
   
     </form>
 
+    <script>
+        cotizacion1.items.material = {{ det|safe }};
+        cotizacion1.list();
+        var det = {{ det|safe }};
+        console.log(det);
+
+
+    </script>
 {% endblock %}
 
 

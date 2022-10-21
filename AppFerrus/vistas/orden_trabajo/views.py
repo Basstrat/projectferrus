@@ -3,7 +3,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
 from AppFerrus.models import Ordendetrabajo, Cotizacion, Articulo
 from AppFerrus.forms import ordendetrabajoForm
 from django.urls import reverse_lazy
@@ -13,22 +13,50 @@ import json
 from AppFerrus.models import Articulo
 from AppFerrus.models import Detordentrabajo
 
+import os
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.contrib.staticfiles import finders
 
 
-
-
-
-
-    #vista basada en clases
 class orden_trabajolistview(ListView):
     model = Ordendetrabajo
     template_name = 'orden_trabajo/lista.html' # este es el que uso para mi listado
 
-  
-
-    @method_decorator(login_required)
-    def dispatch(self, request, *args, **kwargs): 
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'searchdata':
+                data = [] #es una array
+                for i in Ordendetrabajo.objects.all():
+                    data.append(i.toJSON()) #incrustar datos dentro del array
+            elif action == 'search_details_prod':
+                data = []
+                for i in Detordentrabajo.objects.filter(idordendetrabajo_id=request.POST['id']):
+                    data.append(i.toJSON())
+                    print(i)
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False) #safe= false para que maneje varios datos
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Listado orden de trabajo'
+        context['entity'] = 'Ordne de trabajo'
+        context['create_url'] = reverse_lazy('cotizacioncrear')
+        context['list_url'] = reverse_lazy('cotizacionlistado')
+        return context
+
+
 
 
 
@@ -68,13 +96,13 @@ class orden_trabajoCreateView(CreateView):
                 ordentrabajo.fecha = request.POST['fecha']
                 ordentrabajo.estado_id = request.POST['estado']
                 ordentrabajo.cliente_id = request.POST['cliente']
-                ordentrabajo.persona_idpersona = (request.POST['persona'])
+                ordentrabajo.persona_id = (request.POST['persona'])
                 ordentrabajo.definicion = request.POST['definicion']
                 ordentrabajo.idordendetrabajo = request.POST['idordendetrabajo']
                 ordentrabajo.save()
                 for i in products:
                     det = Detordentrabajo()
-                    det.idordendetrabajo = ordentrabajo
+                    det.idordendetrabajo_id = ordentrabajo.idordendetrabajo
                     det.articulo_id = i['idarticulo']
                     det.cant = int(i['cant'])
                     det.save()
@@ -93,8 +121,66 @@ class orden_trabajoCreateView(CreateView):
         context= super().get_context_data(**kwargs)
         context['title'] = 'Crear una orden de trabajo'
         context['entity'] = 'orden de trabajo' #titulo de la tabla y pestaña
+        context['action'] = 'add'
         return context 
         #los decoradores pueden modificar de una forma dinamica una funcion
 
 
+
+
+
+
+class ordentrabajoPdfView(View):
+    def link_callback(uri, rel): #para llamar archivos estaticos
+            """
+            Convert HTML URIs to absolute system paths so xhtml2pdf can access those
+            resources
+            """
+            result = finders.find(uri)
+            if result:
+                    if not isinstance(result, (list, tuple)):
+                            result = [result]
+                    result = list(os.path.realpath(path) for path in result)
+                    path=result[0]
+            else:
+                    sUrl = settings.STATIC_URL        # Typically /static/
+                    sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
+                    mUrl = settings.MEDIA_URL         # Typically /media/
+                    mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
+
+                    if uri.startswith(mUrl):
+                            path = os.path.join(mRoot, uri.replace(mUrl, ""))
+                    elif uri.startswith(sUrl):
+                            path = os.path.join(sRoot, uri.replace(sUrl, ""))
+                    else:
+                            return uri
+
+            # make sure that file exists
+            if not os.path.isfile(path):
+                    raise Exception(
+                            'media URI must start with %s or %s' % (sUrl, mUrl)
+                    )
+            return path
+    
+    
+    
+    
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            template = get_template('orden_trabajo/pdf.html') #aqui obtiene la ruta de la plantilla
+            context = {'ordentrabajo': Ordendetrabajo.objects.get(pk=self.kwargs['pk']),
+            'comp':{'nombre': 'Multiservicios Agroindustriales Ferrus', 'direccion':'San Jose Pinula Km. 20'}
+            } # mi diccionario
+            html = template.render(context) #rerenderizar mi diccionario
+            response = HttpResponse(content_type='application/pdf')
+            #response['Content-Disposition'] = 'attachment; filename="report.pdf"' # mi respuesta para descargar
+            pisaStatus = pisa.CreatePDF( #funcion para crear pdf
+            html, dest=response, #objeto que va tener el response
+            link_callback=self.link_callback
+            )
+            return response
+        except: 
+            pass
+        return HttpResponseRedirect(reverse_lazy('personalista')) #en caso de erro me retorna a esta pagina
 

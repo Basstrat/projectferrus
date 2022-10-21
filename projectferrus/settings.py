@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,10 +27,7 @@ SECRET_KEY = 'django-insecure-g-o1(&=+&g4f-wwt_3lpy+usxt2j9p^_k56j3$df!=6yp!_-m)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ENV_ALLOWED_HOST = os.environ.get('DJANGO_ALLOWED_HOST') or None
-ALLOWED_HOSTS = ['seal-app-num7p.ondigitalocean.app']
-if not DEBUG:
-    ALLOWED_HOSTS += [os.environ.get('DJANGO_ALLOWED_HOST')]
+ALLOWED_HOSTS = []
 
 LOGIN_REDIRECT_URL = '/erp/cliente/listado/'
 LOGOUT_REDIRECT_URL = '/erp/cliente/listado/'
@@ -88,36 +86,15 @@ WSGI_APPLICATION = 'projectferrus.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+       'NAME': 'ferrus3',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
+        'HOST': '127.0.1.1',
+        'DATABASE_PORT': '5432'
     }
 }
 
-POSTGRES_DB = os.environ.get("POSTGRES_DB") #database name
-POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD") # database user password
-POSTGRES_USER = os.environ.get("POSTGRES_USER") # database username
-POSTGRES_HOST = os.environ.get("POSTGRES_HOST") # database host
-POSTGRES_PORT = os.environ.get("POSTGRES_PORT") # database port
-
-POSTGRES_READY = (
-    POSTGRES_DB is not None
-    and POSTGRES_PASSWORD is not None
-    and POSTGRES_USER is not None
-    and POSTGRES_HOST is not None
-    and POSTGRES_PORT is not None
-)
-
-if POSTGRES_READY:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": POSTGRES_DB,
-            "USER": POSTGRES_USER,
-            "PASSWORD": POSTGRES_PASSWORD,
-            "HOST": POSTGRES_HOST,
-            "PORT": POSTGRES_PORT,
-        }
-    }
 
 
 
@@ -139,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+AUTH_USER_MODEL = 'AppFerrus.Usuario' #para defirnir el modelo personalizado usuario
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -156,6 +133,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

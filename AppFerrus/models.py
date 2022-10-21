@@ -5,16 +5,63 @@
 #   * Make sure each OneToOneField and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+from email.policy import default
 from unittest.util import _MAX_LENGTH
 from django.db import models
 from datetime import datetime
+
 from django.forms import model_to_dict
 from django.contrib.auth.models import AbstractBaseUser #donde va ehredar mi modelos usuario
-       
+from django.contrib.auth.models import BaseUserManager #la bases para crear un model usuario       
 
 
 
-       
+class UsuarioManager(BaseUserManager):
+    def create_user(self,username,nombres,password = None):
+
+        usuario = self.model(
+            username = username,
+            nombres = nombres
+    )
+
+        usuario.set_password(password) #utilizo la encriptacion de django
+        usuario.save()
+        return usuario
+
+    def create_superuser(self,username,nombres,password):
+        usuario = self.create_user(
+            username=username,
+            nombres=nombres,
+            password=password
+    )
+        usuario.usuario_administrador = True
+        usuario.save()
+        return usuario  
+
+class Usuario(AbstractBaseUser):
+    username = models.CharField('Nombre Usuario', unique=True, max_length=100)
+    nombres = models.CharField('Nombres', max_length=200, blank=True, null=True)
+    #empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, blank=True, null=True)
+    usuario_activo = models.BooleanField(default=True)
+    usuario_admin = models.BooleanField(default = False)
+    objects = UsuarioManager()
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS =['nombres']
+
+    def __str__(self):
+        return f'{self.nombres}'
+
+    def has_perm(self,perm,obj = None): #permisos para entrar al administrador de django
+        return True
+
+    def has_module_perms(self,app_label): #para definir la app donde esta el modelo
+        return True
+    
+    @property #verifica sin un administrador o no
+    def is_staff(self):
+        return self.usuario_admin
+
 
 
        
@@ -26,6 +73,10 @@ class EstadoOrdentrabajo(models.Model):
     estado = models.CharField(max_length=45, blank=True, null=True)
     def __str__(self): #como van a salir en mis vistas
         return self.estado
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        return item
     class Meta:
         verbose_name = 'EstadoOrdentrabajo'
         verbose_name_plural = 'EstadoOrdentrabajos'
@@ -41,13 +92,15 @@ class Material(models.Model):
     nombre = models.CharField(max_length=45, blank=True, null=True)
     descripcion = models.CharField(max_length=45, blank=True, null=True)
     stock = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    totalcompra = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    cantidadcompra = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     precio_unidad = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
     def __str__(self): #como van a salir en mis vistas
         return self.nombre
 
     def toJSON(self):
-        item = model_to_dict(self)
+        item = model_to_dict(self) #para hacerlos diccionario
         item['precio_unidad'] = float(self.precio_unidad)
         item['stock'] = float(self.precio_unidad)
         return item
@@ -61,27 +114,24 @@ class Material(models.Model):
 class Articulo(models.Model):
     fecha = models.DateField(default=datetime.now)
     idarticulo = models.IntegerField(primary_key=True, unique=True) 
-    codigo = models.CharField(max_length=45, blank=True, null=True)
     nombre = models.CharField(max_length=45, blank=True, null=True)
     precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     descripcion = models.CharField(max_length=45, blank=True, null=True)
     mano_de_obra = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     otrosgastos = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
-    costo_material = models.FloatField(blank=True, null=True)
-    cantidad_material = models.FloatField(blank=True, null=True)
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     porciento = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     stock = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    stockenviado = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     def __str__(self):
         return self.nombre
 
     def toJSON(self):
         item = model_to_dict(self)
-        # item['idarticulo'] = format(self.idarticulo, '.2f')
+        #item['idarticulo'] = format(self.idarticulo, '.2f')
         item['precio'] = float(self.precio)
         item['mano_de_obra'] = float(self.mano_de_obra) 
         item['otrosgastos'] = float(self.otrosgastos)
-        item['costo_material'] = float(self.costo_material) 
         item['subtotal'] = float(self.subtotal)
         item['porciento'] = float(self.porciento)
         item['det'] = [i.toJSON() for i in self.detarticulo_set.all()]
@@ -101,7 +151,7 @@ class Detarticulo(models.Model):
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
     def __str__(self):
-        return self.prod.name
+        return self.material.nombre
 
     def toJSON(self):
         item = model_to_dict(self, exclude=['articulo'])
@@ -128,6 +178,10 @@ class Cliente(models.Model):
     def __str__(self):
         return self.nombre
 
+    def toJSON(self):
+        item = model_to_dict(self)
+        return item
+
     class Meta:
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
@@ -143,17 +197,18 @@ class Cotizacion(models.Model):
     porciento = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     fecha = models.DateField(default=datetime.now)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, default=0)
-    
+
+    def __str__(self):
+        return self.cliente.nombre
     
     def toJSON(self):
         item = model_to_dict(self)
         item['cliente'] = self.cliente.toJSON()
-        item['terminos'] = self.cliente.toJSON()
         item['subtotal'] = format(self.subtotal, '.2f')
         item['total'] = format(self.total, '.2f')
-        item['porciento'] = format(self.porciento, '.2f')
         item['fecha'] = self.fecha.strftime('%Y-%m-%d')
-        item['det'] = [i.toJSON() for i in self.detcotizacion_set.all()]
+        item['det'] = [i.toJSON() for i in self.detcotizacion_set.all()] #para obtener relaciones con llave foreana
+        return item
 
     class Meta:
         verbose_name = 'Cotizacion'
@@ -174,7 +229,7 @@ class Detcotizacion(models.Model):
     def toJSON(self):
         item = model_to_dict(self, exclude=['cotizacion'])
         item['articulo'] = self.articulo.toJSON()
-        item['precio'] = format(self.price, '.2f')
+        item['precio'] = format(self.precio, '.2f')
         item['subtotal'] = format(self.subtotal, '.2f')
         return item
 
@@ -201,11 +256,28 @@ class Proveedores(models.Model):
 class OrdenCompraMaterial(models.Model):
     idorden_compra_material = models.IntegerField(primary_key=True, unique=True)
     total = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
-    descripcion = models.CharField(max_length=45, blank=True, null=True)
     observaciones = models.CharField(max_length=45, blank=True, null=True)
     proveedor = models.ForeignKey(Proveedores, on_delete=models.CASCADE, default=0)
     fecha = models.DateField(default=datetime.now, verbose_name='Fecha_venta')
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    cantidadcompra = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE, default=0)
+
+    def __str__(self):
+        return self.proveedor.nombre
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        item['articulo'] = self.articulo.toJSON()
+        item['proveedor'] = self.proveedor.toJSON()
+        item['subtotal'] = format(self.subtotal, '.2f')
+        item['total'] = format(self.total, '.2f')
+        item['fecha'] = self.fecha.strftime('%Y-%m-%d')
+        item['det'] = [i.toJSON() for i in self.detordencompra_set.all()] #para obtener relaciones con llave foreana
+        return item
+
+
+
     class Meta:
         verbose_name = 'OrdenCompraMaterial'
         verbose_name_plural = 'OrdenCompraMateriales'
@@ -214,19 +286,25 @@ class OrdenCompraMaterial(models.Model):
 class DetOrdenCompra(models.Model):
         
     idorden_compra_material = models.ForeignKey(OrdenCompraMaterial, on_delete=models.CASCADE)
-    articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
+    material = models.ForeignKey(Material, on_delete=models.CASCADE, default=0)
     precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
-    cant = models.IntegerField(default=0)
+    cant = models.CharField(max_length=45, blank=True, null=True)
+    stock = models.IntegerField(default=0)
+    totalcompra = models.IntegerField(default=0)
+    cantidadcompra = models.IntegerField(default=0)
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
     def __str__(self):
         return self.prod.name
 
     def toJSON(self):
-        item = model_to_dict(self, exclude=['cotizacion'])
-        item['articulo'] = self.articulo.toJSON()
+        item = model_to_dict(self, exclude=['idorden_compra_material'])
+        item['material'] = self.material.toJSON()
         item['precio'] = format(self.price, '.2f')
         item['subtotal'] = format(self.subtotal, '.2f')
+        item['stock'] = format(self.stock, '.2f')
+        item['cantidadcompra'] = format(self.cantidadcompra, '.2f')
+        item['totalcompra'] = format(self.totalcompra, '.2f')
         return item
 
     class Meta:
@@ -246,6 +324,10 @@ class Persona(models.Model):
 
     def __str__(self):
         return self.nombre
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        return item
     class Meta:
         verbose_name = 'Persona'
         verbose_name_plural = 'Personas'
@@ -275,40 +357,23 @@ class Empleado(models.Model):
         verbose_name = 'Empleado'
         verbose_name_plural = 'Empleados'
         ordering = ['idempleado']
-       
 
 
-    
 
 
      
 
-class Tipoinventario(models.Model):
-    idtipoinventario = models.IntegerField(primary_key=True, unique=True)
-    tipo = models.CharField(max_length=45, blank=True, null=True)
-
-    class Meta:
-        verbose_name = 'Tipoinventario'
-        verbose_name_plural = 'Tipoinventarios'
-        ordering = ['idtipoinventario']
-
-class Inventario(models.Model):
-    idinventario = models.IntegerField(primary_key=True, unique=True)
-    cantidad = models.IntegerField(blank=True, null=True)
-    tipo = models.OneToOneField(Tipoinventario, on_delete=models.CASCADE, default=0, related_name='inventariotipo')
-    inventario_material = models.ForeignKey(Material, on_delete=models.CASCADE, default=0, related_name='inventariomaterial')
-
-    class Meta:
-        verbose_name = 'Inventario'
-        verbose_name_plural = 'Inventarios'
-        ordering = ['idinventario']
-     
 class EstadoVenta(models.Model):
     idestado_venta = models.IntegerField(primary_key=True, unique=True)
     estado = models.CharField(max_length=45, blank=True, null=True)
 
     def __str__(self):
         return self.estado
+    
+    def toJSON(self):
+        item = model_to_dict(self)
+        return item
+
     class Meta:
         verbose_name = 'EstadoVenta'
         verbose_name_plural = 'EstadoVentas'
@@ -320,8 +385,8 @@ class EstadoVenta(models.Model):
 class Venta(models.Model):
     idventa = models.IntegerField(primary_key=True, unique=True)
     fecha = models.DateField(default=datetime.now, verbose_name='Fecha_venta')
-    estado =models.ForeignKey(EstadoVenta, on_delete=models.CASCADE, db_column='articulo', default=0, related_name='ventaarticulocotizacion')
-    cliente = models.OneToOneField(Cliente, on_delete=models.CASCADE, db_column='cliente', default=0, related_name='ventaclientecotizacion')
+    estado = models.ForeignKey(EstadoVenta, on_delete=models.CASCADE, default=0)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, default=0)
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     total = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     
@@ -332,9 +397,8 @@ class Venta(models.Model):
         item['estado'] = self.estado.toJSON()
         item['subtotal'] = format(self.subtotal, '.2f')
         item['total'] = format(self.total, '.2f')
-        item['idventa'] = format(self.idventa, '.2f')
         item['det'] = [i.toJSON() for i in self.detventa_set.all()]
-
+        return item
     
     class Meta:
         verbose_name = 'Venta'
@@ -342,18 +406,19 @@ class Venta(models.Model):
         ordering = ['idventa']
 
 class Detventa(models.Model):
-        
     idventa = models.ForeignKey(Venta, on_delete=models.CASCADE)
     articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
+    precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     cant = models.IntegerField(default=0)
+    subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
     def __str__(self):
-        return self.prod.name
+        return self.articulo.nombre
 
     def toJSON(self):
-        item = model_to_dict(self, exclude=['cotizacion'])
+        item = model_to_dict(self, exclude=['idventa'])
         item['articulo'] = self.articulo.toJSON()
-        item['precio'] = format(self.price, '.2f')
+        item['precio'] = format(self.precio, '.2f')
         item['subtotal'] = format(self.subtotal, '.2f')
         return item
 
@@ -371,20 +436,20 @@ class Ordendetrabajo(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, default=0)
 
     def __str__(self):
-        return self.prod.name
+        return self.cliente.nombre
 
-   # def toJSON(self):
-    #    item = model_to_dict(self)
-     #   item['persona'] = self.persona.toJSON()
-      #  item['estado'] = self.estado.toJSON()
-       # item['definicion'] = self.definicion.toJSON()
-        #item['idordendetrabajo'] = format(self.total, '.2f')
-        #item['fecha'] = self.fecha.strftime('%Y-%m-%d')
-        #item['det'] = [i.toJSON() for i in self.detordentrabajo_set.all()]
+    def toJSON(self):
+        item = model_to_dict(self)
+        item['persona'] = self.persona.toJSON()
+        item['cliente'] = self.cliente.toJSON()
+        item['estado'] = self.estado.toJSON()
+        item['fecha'] = self.fecha.strftime('%Y-%m-%d')
+        item['det'] = [i.toJSON() for i in self.detordentrabajo_set.all()]
+        return item
 
 class Meta:
-        verbose_name = 'Ordendetrabajo'
-        verbose_name_plural = 'Ordendetrabajos'
+        verbose_name = 'Orden de trabajo'
+        verbose_name_plural = 'Ordenes de trabajos'
         ordering = ['idordendetrabajo']
 
 class Detordentrabajo(models.Model):
@@ -394,10 +459,10 @@ class Detordentrabajo(models.Model):
     cant = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.prod.name
+        return self.articulo.nombre
 
     def toJSON(self):
-        item = model_to_dict(self, exclude=['ordendetrabajo'])
+        item = model_to_dict(self, exclude=['idordendetrabajo'])
         item['articulo'] = self.articulo.toJSON()
         return item
 
@@ -409,7 +474,6 @@ class Detordentrabajo(models.Model):
 #class Usuario(models.Model):
 class Envios(models.Model):
     idenvios = models.IntegerField(primary_key=True, unique=True)
-    fecha = models.DateField(default=datetime.now, verbose_name='Fecha_envio')
     observaciones = models.CharField(db_column='Observaciones', max_length=45, blank=True, null=True)  # Field name made lowercase.
     fecha = models.DateField(default=datetime.now)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, default=0)
@@ -419,11 +483,9 @@ class Envios(models.Model):
         item = model_to_dict(self)
         item['cliente'] = self.cliente.toJSON()
         item['persona'] = self.persona.toJSON()
-        item['observaciones'] = self.definicion.toJSON()
-        item['idenvios'] = format(self.idenvios, '.2f')
         item['fecha'] = self.fecha.strftime('%Y-%m-%d')
         item['det'] = [i.toJSON() for i in self.detenvios_set.all()]
-
+        return item
     
     class Meta:
         verbose_name = 'Envio'
@@ -437,10 +499,10 @@ class Detenvios(models.Model):
     cant = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.prod.name
+        return self.articulo.nombre
 
     def toJSON(self):
-        item = model_to_dict(self, exclude=['venta'])
+        item = model_to_dict(self, exclude=['idenvios'])
         item['articulo'] = self.articulo.toJSON()
         return item
 

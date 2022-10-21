@@ -85,11 +85,14 @@
                                 <thead>
                                 <tr>
                                     <th>Eliminar</th>
-                                    <th>Producto</th>
-                            
-                                    <th>Precio</th>
-            
+                                    <th>Material</th>
                                     <th>Cantidad</th>
+                                    <th>Stock</th>
+                                    <th>Cantidad compra</th>
+                                    <th>Total compra</th>
+                                    <th>Precio</th>
+                                    <th>Subtotal</th>            
+                                    
                      
                                     
                                    
@@ -117,7 +120,15 @@
                                 {{ form.fecha }}
                             </div>
                            
-                           
+                        </div>
+                        <div class="form-group">
+                            <label>Articulo:</label>
+                            {{ form.articulo }}
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad:</label>
+                            {{ form.cantidadcompra }}
+                        </div>
 
                             </div>
                             <div class="form-group">
@@ -164,6 +175,17 @@
     
   
     </form>
+
+      
+    <script>
+        cotizacion1.items.material = {{ det|safe }};
+        cotizacion1.list();
+        var det = {{ det|safe }};
+        console.log(det);
+
+
+    </script>
+
 
 {% endblock %}
 
