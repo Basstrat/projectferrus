@@ -20,7 +20,7 @@ class materiallistview(ListView):
 
     #metodos dispatch, este redireciona para post or get
     #@method_decorator(login_required) metodo para confirmar si esta logeado
-    @method_decorator(login_required)
+    @method_decorator(csrf_exempt) 
     def dispatch(self, request, *args, **kwargs): 
         return super().dispatch(request, *args, **kwargs)
         
@@ -49,7 +49,7 @@ class materialCreateView(CreateView):
     success_url = reverse_lazy('materiallista') #direccion hacia donde voy a redireccionar
     
     #aqui viy a definir para cuando se aguarde un dato repetido
-    @method_decorator(login_required)
+    @method_decorator(csrf_exempt) 
     def dispatch(self, request, *args, **kwargs): 
         return super().dispatch(request, *args, **kwargs)
     
@@ -69,7 +69,7 @@ class materialUpdateView(UpdateView):
     template_name = 'material/crearregistro.html' #direccion de la pagina que voy usar
     success_url = reverse_lazy('materiallista') #direccion hacia donde voy a redireccionar
     
-    @method_decorator(login_required)
+    @method_decorator(csrf_exempt) 
     def dispatch(self, request, *args, **kwargs): 
         return super().dispatch(request, *args, **kwargs)
     
@@ -85,7 +85,7 @@ class materialDeleteView(DeleteView):
     template_name = 'material/eliminaregistro.html' #direccion de la pagina que voy usar
     success_url = reverse_lazy('materiallista') #direccion hacia donde voy a redireccionar
     
-    @method_decorator(login_required)
+    @method_decorator(csrf_exempt) 
     def dispatch(self, request, *args, **kwargs): 
         return super().dispatch(request, *args, **kwargs)
         

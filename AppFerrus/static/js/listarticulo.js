@@ -25,7 +25,7 @@ $(function () {
                 
                 "defaultContent": ''
             },
-            {"data": "idarticulo"},
+            {"data": "id"},
             {"data": "nombre"},
             {"data": "precio"},
             {"data": "descripcion"},
@@ -47,10 +47,10 @@ $(function () {
                 class: 'text-center',
                 orderable: false,
                 render: function (data, type, row) {
-                    var buttons = '<a href="/erp/cotizacion/elminar/' + row.idarticulo + '/" class="btn btn-danger btn-sm">Eliminar</a> ';
-                    buttons += '<a href="/erp/articulo/editarregistro/' + row.idarticulo + '/" class="btn btn-warning btn-sm">Editar</a> ';
+                    var buttons = '<a href="/erp/articulo/eliminaregistro/' + row.id + '/" class="btn btn-danger btn-sm">Eliminar</a> ';
+                    buttons += '<a href="/erp/articulo/editarregistro/' + row.id + '/" class="btn btn-warning btn-sm">Editar</a> ';
                     buttons += '<a rel="details" class="btn btn-success btn-sm">Detalles</a> ';
-                    buttons += '<a href="/erp/orden_compra/crear/' + row.idarticulo + '/" class="btn btn-warning btn-sm">Calcular</a> ';
+                    buttons += '<a href="/erp/orden_compra/crear/' + row.id + '/" class="btn btn-warning btn-sm">Calcular</a> ';
                     buttons += '<a href="/erp/cotizacion/invoice/pdf/'+row.id+'/" target="_blank" class="btn btn-info btn-sm">Imprimir</a> ';
                     return buttons;
                 }
@@ -81,14 +81,12 @@ $('#data tbody')
                     type: 'POST',
                     data: {
                         'action': 'search_details_prod',
-                        'idarticulo': data.id
+                        'id': data.id
                     },
                     dataSrc: ""
                 },
                 columns: [
-                   
-                    {"data": "idmaterial"},
-                    {"data": "descripcion"},
+                    {"data": "material.nombre"},
                     {"data": "precio"},
                     {"data": "cant"},
                     {"data": "subtotal"},

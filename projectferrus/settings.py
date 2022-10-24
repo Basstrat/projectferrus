@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'projectferrus.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-       'NAME': 'ferrus3',
+       'NAME': 'ferrus5',
         'USER': 'postgres',
         'PASSWORD': '1234',
         'HOST': '127.0.1.1',

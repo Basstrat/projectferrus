@@ -16,7 +16,10 @@ $(function () {
             data: {
                 'action': 'searchdata'
             },
-            dataSrc: "" //si en caso una variable
+            dataSrc: "", //si en caso una variable
+            headers:{
+                'X-CSRFToken': csrftoken
+            }
         },
         columns: [
             {

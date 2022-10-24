@@ -30,7 +30,7 @@ class articulolistview(ListView):
                     data.append(i.toJSON()) #incrustar datos dentro del array
             elif action == 'search_details_prod':
                 data = []
-                for i in Detarticulo.objects.filter(articulo_id=request.POST['idarticulo']):
+                for i in Detarticulo.objects.filter(articulo_id=request.POST['id']):
                     data.append(i.toJSON())
             else:
                 data['error'] = 'Ha ocurrido un error'
@@ -85,7 +85,6 @@ class articuloCreateView(CreateView):
                 print(request.POST)
                 cotizacion1 = json.loads(request.POST['cotizacion1'])
                 articulo = Articulo()
-                articulo.idarticulo = cotizacion1['idarticulo']
                 articulo.nombre = cotizacion1['nombre']
                 articulo.fecha = cotizacion1['fecha']
                 articulo.precio = float(cotizacion1['precio'])
@@ -95,8 +94,8 @@ class articuloCreateView(CreateView):
     #iterar materiales
                 for i in cotizacion1['material']:
                     det = Detarticulo()
-                    det.articulo_id = articulo.idarticulo
-                    det.material_id = i['idmaterial']
+                    det.articulo_id = articulo.id
+                    det.material_id = i['id']
                     det.cant = int(i['cant'])
                     det.precio = float(i['precio_unidad'])
                     det.subtotal = float(i['subtotal'])
@@ -141,7 +140,7 @@ class articuloUpdateView(UpdateView):
                     data.append(item) #item es lo que va tirar la busqueda
             elif action == 'searchdetails_prod':
                 data= []
-                for i in Detarticulo.objects.filter(articulo_id=request.POST['idarticulo']):
+                for i in Detarticulo.objects.filter(articulo_id=request.POST['id']):
                     data.append(i.toJSON())
 
             elif action == 'edit': #para añadir mi registro
@@ -151,7 +150,6 @@ class articuloUpdateView(UpdateView):
                 #cotizacion = Cotizacion.objects.gets(pk=self.get().id)
                 cotizacion1 = json.loads(request.POST['cotizacion1'])
                 articulo = Articulo()
-                articulo.idarticulo = cotizacion1['idarticulo']
                 articulo.nombre = cotizacion1['nombre']
                 articulo.fecha = cotizacion1['fecha']
                 articulo.precio = float(cotizacion1['precio'])
@@ -162,8 +160,8 @@ class articuloUpdateView(UpdateView):
     #iterar productos
                 for i in cotizacion1['material']:
                     det = Detarticulo()
-                    det.articulo_id = articulo.idarticulo
-                    det.material_id = i['idmaterial']
+                    det.articulo_id = articulo.id
+                    det.material_id = i['id']
                     det.cant = int(i['cant'])
                     det.precio = float(i['precio_unidad'])
                     det.subtotal = float(i['subtotal'])
@@ -179,7 +177,7 @@ class articuloUpdateView(UpdateView):
     def get_articulo_detalles(self): #para llamar mis productos
         data = [] #lo hago diccionario
         try:
-            for i in Detarticulo.objects.filter(articulo_id=self.get_object().idarticulo):
+            for i in Detarticulo.objects.filter(articulo_id=self.get_object().id):
                 item = i.material.toJSON() #aqui pido mis articulos
                 item['cant'] = i.cant #aqui pido mi cantidad
                 data.append(item) #aqui llamo al diccionario
@@ -202,7 +200,7 @@ class articuloDeleteView(DeleteView):
     template_name = 'articulo/eliminaregistro.html' #direccion de la pagina que voy usar
     success_url = reverse_lazy('articulolista') #direccion hacia donde voy a redireccionar
     
-    @method_decorator(login_required)
+    @method_decorator(csrf_exempt) 
     def dispatch(self, request, *args, **kwargs): 
         return super().dispatch(request, *args, **kwargs)
         

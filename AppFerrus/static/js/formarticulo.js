@@ -1,7 +1,6 @@
 var tblarticulos;
 var cotizacion1 = {
     items:  {
-    idarticulo: 0.00,
     nombre: '',
     descripcion: '',
     articulo: '',
@@ -24,7 +23,7 @@ var cotizacion1 = {
         $.each(this.items.material, function (pos, dict) {//para recorrer articulo{
             console.log(pos);
             console.log(dict);
-            dict.subtotal = dict.cant * parseFloat(dict.precio_unidad);
+            dict.subtotal = dict.cant * dict.precio_unidad;
             subtotal+=dict.subtotal //aqui sumo mi columna
          
         });
@@ -57,7 +56,7 @@ var cotizacion1 = {
             destroy: true,
             data: this.items.material,
             columns: [
-                {"data": "idmaterial" },
+                {"data": "id" },
                 {"data": "nombre"},
                 {"data": "descripcion"},
                 {"data": "precio_unidad"},
@@ -240,7 +239,6 @@ $('form').on('submit', function (e){
     cotizacion1.items.fecha = $('input[name="fecha"]').val(); //aqui llamo a los valores de mis inputs html
     cotizacion1.items.nombre = $('input[name="nombre"]').val();
     cotizacion1.items.descripcion = $('input[name="descripcion"]').val();
-    cotizacion1.items.idarticulo = $('input[name="idarticulo"]').val();
     cotizacion1.items.precio = $('input[name="precio"]').val();
     var parameters = new FormData();
 

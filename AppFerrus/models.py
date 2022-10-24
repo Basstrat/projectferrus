@@ -12,7 +12,7 @@ from datetime import datetime
 
 from django.forms import model_to_dict
 from django.contrib.auth.models import AbstractBaseUser #donde va ehredar mi modelos usuario
-from django.contrib.auth.models import BaseUserManager #la bases para crear un model usuario       
+from django.contrib.auth.models import BaseUserManager, PermissionsMixin #la bases para crear un model usuario       
 
 
 
@@ -38,12 +38,12 @@ class UsuarioManager(BaseUserManager):
         usuario.save()
         return usuario  
 
-class Usuario(AbstractBaseUser):
+class Usuario(AbstractBaseUser, PermissionsMixin):
     username = models.CharField('Nombre Usuario', unique=True, max_length=100)
     nombres = models.CharField('Nombres', max_length=200, blank=True, null=True)
     #empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, blank=True, null=True)
     usuario_activo = models.BooleanField(default=True)
-    usuario_admin = models.BooleanField(default = False)
+    usuario_admin = models.BooleanField(default = True)
     objects = UsuarioManager()
 
     USERNAME_FIELD = 'username'
@@ -88,7 +88,6 @@ class EstadoOrdentrabajo(models.Model):
       
 
 class Material(models.Model):
-    idmaterial = models.IntegerField(primary_key=True, unique=True, default=0)
     nombre = models.CharField(max_length=45, blank=True, null=True)
     descripcion = models.CharField(max_length=45, blank=True, null=True)
     stock = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
@@ -109,11 +108,10 @@ class Material(models.Model):
     class Meta:
         verbose_name = 'Material'
         verbose_name_plural = 'Materiales'
-        ordering = ['idmaterial']
+        ordering = ['id']
 
 class Articulo(models.Model):
     fecha = models.DateField(default=datetime.now)
-    idarticulo = models.IntegerField(primary_key=True, unique=True) 
     nombre = models.CharField(max_length=45, blank=True, null=True)
     precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     descripcion = models.CharField(max_length=45, blank=True, null=True)
@@ -140,7 +138,7 @@ class Articulo(models.Model):
     class Meta:
        verbose_name = 'Articulo'
        verbose_name_plural = 'Articulos'
-       ordering = ['idarticulo']
+       ordering = ['id']
 
 
 class Detarticulo(models.Model):
@@ -224,7 +222,7 @@ class Detcotizacion(models.Model):
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
     def __str__(self):
-        return self.prod.name
+        return self.articulo.nombre
 
     def toJSON(self):
         item = model_to_dict(self, exclude=['cotizacion'])
@@ -239,7 +237,6 @@ class Detcotizacion(models.Model):
         ordering = ['id']
 
 class Proveedores(models.Model):
-    idproveedores = models.IntegerField(primary_key=True, unique=True)
     nombre = models.CharField(max_length=45, blank=True, null=True)
     direccion = models.CharField(max_length=45, blank=True, null=True)
     telefono = models.IntegerField(blank=True, null=True)
@@ -251,10 +248,9 @@ class Proveedores(models.Model):
     class Meta:
         verbose_name = 'Proveedor'
         verbose_name_plural = 'Proveedores'
-        ordering = ['idproveedores']
+        ordering = ['id']
 
 class OrdenCompraMaterial(models.Model):
-    idorden_compra_material = models.IntegerField(primary_key=True, unique=True)
     total = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     observaciones = models.CharField(max_length=45, blank=True, null=True)
     proveedor = models.ForeignKey(Proveedores, on_delete=models.CASCADE, default=0)
@@ -281,11 +277,11 @@ class OrdenCompraMaterial(models.Model):
     class Meta:
         verbose_name = 'OrdenCompraMaterial'
         verbose_name_plural = 'OrdenCompraMateriales'
-        ordering = ['idorden_compra_material']
+        ordering = ['id']
      
 class DetOrdenCompra(models.Model):
         
-    idorden_compra_material = models.ForeignKey(OrdenCompraMaterial, on_delete=models.CASCADE)
+    orden_compra_material = models.ForeignKey(OrdenCompraMaterial, on_delete=models.CASCADE)
     material = models.ForeignKey(Material, on_delete=models.CASCADE, default=0)
     precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     cant = models.CharField(max_length=45, blank=True, null=True)
@@ -316,7 +312,6 @@ class DetOrdenCompra(models.Model):
     
 
 class Persona(models.Model):
-    idpersona = models.IntegerField(primary_key=True, unique=True)
     nombre = models.CharField(max_length=45, blank=True, null=True)
     apellido = models.CharField(max_length=45, blank=True, null=True)
     direccion = models.CharField(max_length=45, blank=True, null=True)
@@ -331,11 +326,10 @@ class Persona(models.Model):
     class Meta:
         verbose_name = 'Persona'
         verbose_name_plural = 'Personas'
-        ordering = ['idpersona']
+        ordering = ['id']
 
 
 class Puestoempleado(models.Model):
-    idpuestoempleado = models.IntegerField(primary_key=True, unique=True)
     nombre = models.CharField(max_length=45, blank=True, null=True)
     descripcion = models.CharField(max_length=45, blank=True, null=True)
 
@@ -344,10 +338,9 @@ class Puestoempleado(models.Model):
     class Meta:
         verbose_name = 'Puestoempleado'
         verbose_name_plural = 'Puestoempleados'
-        ordering = ['idpuestoempleado']
+        ordering = ['id']
 
 class Empleado(models.Model):
-    idempleado = models.IntegerField(primary_key=True, unique=True)
     persona = models.OneToOneField(Persona,  default=0, on_delete=models.CASCADE, related_name='empleadopersona')
     puestoempleado = models.OneToOneField(Puestoempleado, on_delete=models.CASCADE, default=0, related_name='empleadopuesto')
 
@@ -356,7 +349,7 @@ class Empleado(models.Model):
     class Meta:
         verbose_name = 'Empleado'
         verbose_name_plural = 'Empleados'
-        ordering = ['idempleado']
+        ordering = ['id']
 
 
 
@@ -364,7 +357,6 @@ class Empleado(models.Model):
      
 
 class EstadoVenta(models.Model):
-    idestado_venta = models.IntegerField(primary_key=True, unique=True)
     estado = models.CharField(max_length=45, blank=True, null=True)
 
     def __str__(self):
@@ -377,13 +369,12 @@ class EstadoVenta(models.Model):
     class Meta:
         verbose_name = 'EstadoVenta'
         verbose_name_plural = 'EstadoVentas'
-        ordering = ['idestado_venta']
+        ordering = ['id']
      
 
 
 
 class Venta(models.Model):
-    idventa = models.IntegerField(primary_key=True, unique=True)
     fecha = models.DateField(default=datetime.now, verbose_name='Fecha_venta')
     estado = models.ForeignKey(EstadoVenta, on_delete=models.CASCADE, default=0)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, default=0)
@@ -403,10 +394,10 @@ class Venta(models.Model):
     class Meta:
         verbose_name = 'Venta'
         verbose_name_plural = 'Ventas'
-        ordering = ['idventa']
+        ordering = ['id']
 
 class Detventa(models.Model):
-    idventa = models.ForeignKey(Venta, on_delete=models.CASCADE)
+    venta = models.ForeignKey(Venta, on_delete=models.CASCADE)
     articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
     precio = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
     cant = models.IntegerField(default=0)
@@ -428,7 +419,6 @@ class Detventa(models.Model):
         ordering = ['id']
              
 class Ordendetrabajo(models.Model):
-    idordendetrabajo = models.IntegerField(primary_key=True, unique=True)
     definicion = models.CharField(max_length=45, blank=True, null=True)
     fecha = models.DateField(blank=True, null=True)
     persona = models.ForeignKey(Persona, on_delete=models.CASCADE,  default=0)
@@ -450,11 +440,11 @@ class Ordendetrabajo(models.Model):
 class Meta:
         verbose_name = 'Orden de trabajo'
         verbose_name_plural = 'Ordenes de trabajos'
-        ordering = ['idordendetrabajo']
+        ordering = ['id']
 
 class Detordentrabajo(models.Model):
         
-    idordendetrabajo = models.ForeignKey(Ordendetrabajo, on_delete=models.CASCADE)
+    ordendetrabajo = models.ForeignKey(Ordendetrabajo, on_delete=models.CASCADE)
     articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
     cant = models.IntegerField(default=0)
 
@@ -473,7 +463,6 @@ class Detordentrabajo(models.Model):
 
 #class Usuario(models.Model):
 class Envios(models.Model):
-    idenvios = models.IntegerField(primary_key=True, unique=True)
     observaciones = models.CharField(db_column='Observaciones', max_length=45, blank=True, null=True)  # Field name made lowercase.
     fecha = models.DateField(default=datetime.now)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, default=0)
@@ -490,11 +479,11 @@ class Envios(models.Model):
     class Meta:
         verbose_name = 'Envio'
         verbose_name_plural = 'Envios'
-        ordering = ['idenvios']
+        ordering = ['id']
             
 class Detenvios(models.Model):
         
-    idenvios = models.ForeignKey(Envios, on_delete=models.CASCADE)
+    envios = models.ForeignKey(Envios, on_delete=models.CASCADE)
     articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
     cant = models.IntegerField(default=0)
 

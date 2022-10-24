@@ -35,9 +35,9 @@ class Cotizacionlistview(ListView):
     model = Cotizacion
     template_name = 'cotizacion/lista.html' # este es el que uso para mi listado
 
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+    #@method_decorator(csrf_exempt)
+   # def dispatch(self, request, *args, **kwargs):
+    #    return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}

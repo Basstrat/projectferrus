@@ -13,13 +13,13 @@
 {% block filas %}
 {% for p in object_list %}
 <tr>
-  <td>{{ p.idmaterial }} </td>
+  <td>{{ p.id }} </td>
   <td> {{ p.nombre }}</td>
   <td> {{ p.descripcion }}</td>
   <td>Q {{ p.precio_unidad }}</td>
 
-  <td><a href="{% url 'materialeditarregistro' p.idmaterial %}" class="btn btn-primary btn-sm">Editar</a>
-    <a href="{% url 'materialeliminaregistro' p.idmaterial %}" class="btn btn-danger btn-sm">Eliminar</a>
+  <td><a href="{% url 'materialeditarregistro' p.id %}" class="btn btn-primary btn-sm">Editar</a>
+    <a href="{% url 'materialeliminaregistro' p.id %}" class="btn btn-danger btn-sm">Eliminar</a>
   </td>
 </tr> 
 {% endfor %}
